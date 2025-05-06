@@ -1,0 +1,17 @@
+{
+  "version": 2,
+  "dgSpecHash": "rK0DXRUmf2c=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\Diakjulych Vasyl\\Desktop\\SemesterProject\\ChessUI\\ChessUI.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Diakjulych Vasyl\\.nuget\\packages\\atksharp\\3.24.24.95\\atksharp.3.24.24.95.nupkg.sha512",
+    "C:\\Users\\Diakjulych Vasyl\\.nuget\\packages\\cairosharp\\3.24.24.95\\cairosharp.3.24.24.95.nupkg.sha512",
+    "C:\\Users\\Diakjulych Vasyl\\.nuget\\packages\\gdksharp\\3.24.24.95\\gdksharp.3.24.24.95.nupkg.sha512",
+    "C:\\Users\\Diakjulych Vasyl\\.nuget\\packages\\giosharp\\3.24.24.95\\giosharp.3.24.24.95.nupkg.sha512",
+    "C:\\Users\\Diakjulych Vasyl\\.nuget\\packages\\glibsharp\\3.24.24.95\\glibsharp.3.24.24.95.nupkg.sha512",
+    "C:\\Users\\Diakjulych Vasyl\\.nuget\\packages\\gtksharp\\3.24.24.95\\gtksharp.3.24.24.95.nupkg.sha512",
+    "C:\\Users\\Diakjulych Vasyl\\.nuget\\packages\\pangosharp\\3.24.24.95\\pangosharp.3.24.24.95.nupkg.sha512",
+    "C:\\Users\\Diakjulych Vasyl\\.nuget\\packages\\chesslogic\\1.0.0\\chesslogic.1.0.0.nupkg.sha512"
+  ],
+  "logs": []
+}
