@@ -1,0 +1,11 @@
+C:\Users\Diakjulych Vasyl\Desktop\SemesterProjectChess\ChessLogic\bin\Debug\net9.0\ChessLogic.deps.json
+C:\Users\Diakjulych Vasyl\Desktop\SemesterProjectChess\ChessLogic\bin\Debug\net9.0\ChessLogic.dll
+C:\Users\Diakjulych Vasyl\Desktop\SemesterProjectChess\ChessLogic\bin\Debug\net9.0\ChessLogic.pdb
+C:\Users\Diakjulych Vasyl\Desktop\SemesterProjectChess\ChessLogic\obj\Debug\net9.0\ChessLogic.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Diakjulych Vasyl\Desktop\SemesterProjectChess\ChessLogic\obj\Debug\net9.0\ChessLogic.AssemblyInfoInputs.cache
+C:\Users\Diakjulych Vasyl\Desktop\SemesterProjectChess\ChessLogic\obj\Debug\net9.0\ChessLogic.AssemblyInfo.cs
+C:\Users\Diakjulych Vasyl\Desktop\SemesterProjectChess\ChessLogic\obj\Debug\net9.0\ChessLogic.csproj.CoreCompileInputs.cache
+C:\Users\Diakjulych Vasyl\Desktop\SemesterProjectChess\ChessLogic\obj\Debug\net9.0\ChessLogic.dll
+C:\Users\Diakjulych Vasyl\Desktop\SemesterProjectChess\ChessLogic\obj\Debug\net9.0\refint\ChessLogic.dll
+C:\Users\Diakjulych Vasyl\Desktop\SemesterProjectChess\ChessLogic\obj\Debug\net9.0\ChessLogic.pdb
+C:\Users\Diakjulych Vasyl\Desktop\SemesterProjectChess\ChessLogic\obj\Debug\net9.0\ref\ChessLogic.dll
