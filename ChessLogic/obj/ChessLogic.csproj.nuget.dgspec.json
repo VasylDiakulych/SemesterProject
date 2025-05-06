@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Diakjulych Vasyl\\Desktop\\SemesterProjectChess\\ChessLogic\\ChessLogic.csproj": {}
+    "C:\\Users\\Diakjulych Vasyl\\Desktop\\SemesterProject\\ChessLogic\\ChessLogic.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Diakjulych Vasyl\\Desktop\\SemesterProjectChess\\ChessLogic\\ChessLogic.csproj": {
+    "C:\\Users\\Diakjulych Vasyl\\Desktop\\SemesterProject\\ChessLogic\\ChessLogic.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Diakjulych Vasyl\\Desktop\\SemesterProjectChess\\ChessLogic\\ChessLogic.csproj",
+        "projectUniqueName": "C:\\Users\\Diakjulych Vasyl\\Desktop\\SemesterProject\\ChessLogic\\ChessLogic.csproj",
         "projectName": "ChessLogic",
-        "projectPath": "C:\\Users\\Diakjulych Vasyl\\Desktop\\SemesterProjectChess\\ChessLogic\\ChessLogic.csproj",
+        "projectPath": "C:\\Users\\Diakjulych Vasyl\\Desktop\\SemesterProject\\ChessLogic\\ChessLogic.csproj",
         "packagesPath": "C:\\Users\\Diakjulych Vasyl\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Diakjulych Vasyl\\Desktop\\SemesterProjectChess\\ChessLogic\\obj\\",
+        "outputPath": "C:\\Users\\Diakjulych Vasyl\\Desktop\\SemesterProject\\ChessLogic\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\Diakjulych Vasyl\\AppData\\Roaming\\NuGet\\NuGet.Config"
