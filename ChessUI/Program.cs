@@ -9,7 +9,8 @@ public class MainMenuWindow : Gtk.Window {
     {
         SetDefaultSize(500, 500);
         SetPosition(WindowPosition.Center);
-        Icon = new Pixbuf("Assets/icon.png");
+        string iconPath = System.IO.Path.Combine("Assets", "icon.png");
+        Icon = new Pixbuf(iconPath);
         DeleteEvent += (o, args) => Application.Quit();
 
         Box box = new Box(Orientation.Vertical, 10){

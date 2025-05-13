@@ -76,3 +76,81 @@ public class PawnPromotion : Move{
     }
 
 }
+
+public class Castle : Move{
+    public override MoveType Type { get; }
+    public override Position FromPos { get; }
+    public override Position ToPos { get; }
+
+    private readonly Direction kingMoveDir;
+    private readonly Position rookFromPos;
+    private readonly Position rookToPos;
+
+    public Castle(MoveType type, Position kingPos, Board board){
+        Type = type;
+        FromPos = kingPos;
+
+        if(Type == MoveType.CastleKS){
+            kingMoveDir = Direction.East;
+            ToPos = new Position(kingPos.Row, Board.BoardSize - 2);
+
+            int i = kingPos.Column + 1;
+            while(i < Board.BoardSize){
+                Position pos = new Position(kingPos.Row, i);
+                Piece p = board[pos];
+                if (p != null && p.Type == PieceType.Rook && p.Color == board[FromPos].Color && !p.HasMoved)
+                    break;
+                i++;
+            }
+            rookFromPos = new Position(kingPos.Row, i);
+            rookToPos = new Position(kingPos.Row, 5);
+        }
+        else{
+            kingMoveDir = Direction.West;
+            ToPos = new Position(kingPos.Row, 2);
+
+            int i = kingPos.Column - 1;
+            while (i >= 0)
+            {
+                Position pos = new Position(kingPos.Row, i);
+                Piece p = board[pos];
+                if (p != null && p.Type == PieceType.Rook && p.Color == board[FromPos].Color && !p.HasMoved)
+                    break;
+                i--;
+            }
+            rookFromPos = new Position(kingPos.Row, i);
+            rookToPos = new Position(kingPos.Row, 3);
+        }
+    }
+
+    public override void Execute(Board board)
+    {
+        new NormalMove(FromPos, ToPos).Execute(board);
+        new NormalMove(rookFromPos, rookToPos).Execute(board);
+    }
+
+    public override bool IsLegal(Board board)
+    {
+        Player player = board[FromPos].Color;
+        
+        if(board.IsInCheck(player)){
+            return false;
+        }
+        
+        Board copy = board.Copy();
+        Position kingPos = FromPos;
+
+        for(int i = 0; i<2; i++){
+            new NormalMove(kingPos, kingPos + kingMoveDir).Execute(copy);
+            kingPos += kingMoveDir;
+
+            if(copy.IsInCheck(player)){ 
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+}
+

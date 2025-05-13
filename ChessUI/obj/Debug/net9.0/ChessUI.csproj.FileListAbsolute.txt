@@ -1,9 +1,3 @@
-C:\Users\Diakjulych Vasyl\Desktop\SemesterProject\ChessUI\obj\Debug\net9.0\ChessUI.csproj.AssemblyReference.cache
-C:\Users\Diakjulych Vasyl\Desktop\SemesterProject\ChessUI\obj\Debug\net9.0\ChessUI.GeneratedMSBuildEditorConfig.editorconfig
-C:\Users\Diakjulych Vasyl\Desktop\SemesterProject\ChessUI\obj\Debug\net9.0\ChessUI.AssemblyInfoInputs.cache
-C:\Users\Diakjulych Vasyl\Desktop\SemesterProject\ChessUI\obj\Debug\net9.0\ChessUI.AssemblyInfo.cs
-C:\Users\Diakjulych Vasyl\Desktop\SemesterProject\ChessUI\obj\Debug\net9.0\ChessUI.csproj.CoreCompileInputs.cache
-C:\Users\Diakjulych Vasyl\Desktop\SemesterProject\ChessUI\obj\Debug\net9.0\ChessUI.sourcelink.json
 C:\Users\Diakjulych Vasyl\Desktop\SemesterProject\ChessUI\bin\Debug\net9.0\ChessUI.exe
 C:\Users\Diakjulych Vasyl\Desktop\SemesterProject\ChessUI\bin\Debug\net9.0\ChessUI.deps.json
 C:\Users\Diakjulych Vasyl\Desktop\SemesterProject\ChessUI\bin\Debug\net9.0\ChessUI.runtimeconfig.json
@@ -18,6 +12,12 @@ C:\Users\Diakjulych Vasyl\Desktop\SemesterProject\ChessUI\bin\Debug\net9.0\GtkSh
 C:\Users\Diakjulych Vasyl\Desktop\SemesterProject\ChessUI\bin\Debug\net9.0\PangoSharp.dll
 C:\Users\Diakjulych Vasyl\Desktop\SemesterProject\ChessUI\bin\Debug\net9.0\ChessLogic.dll
 C:\Users\Diakjulych Vasyl\Desktop\SemesterProject\ChessUI\bin\Debug\net9.0\ChessLogic.pdb
+C:\Users\Diakjulych Vasyl\Desktop\SemesterProject\ChessUI\obj\Debug\net9.0\ChessUI.csproj.AssemblyReference.cache
+C:\Users\Diakjulych Vasyl\Desktop\SemesterProject\ChessUI\obj\Debug\net9.0\ChessUI.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Diakjulych Vasyl\Desktop\SemesterProject\ChessUI\obj\Debug\net9.0\ChessUI.AssemblyInfoInputs.cache
+C:\Users\Diakjulych Vasyl\Desktop\SemesterProject\ChessUI\obj\Debug\net9.0\ChessUI.AssemblyInfo.cs
+C:\Users\Diakjulych Vasyl\Desktop\SemesterProject\ChessUI\obj\Debug\net9.0\ChessUI.csproj.CoreCompileInputs.cache
+C:\Users\Diakjulych Vasyl\Desktop\SemesterProject\ChessUI\obj\Debug\net9.0\ChessUI.sourcelink.json
 C:\Users\Diakjulych Vasyl\Desktop\SemesterProject\ChessUI\obj\Debug\net9.0\ChessUI.csproj.Up2Date
 C:\Users\Diakjulych Vasyl\Desktop\SemesterProject\ChessUI\obj\Debug\net9.0\ChessUI.dll
 C:\Users\Diakjulych Vasyl\Desktop\SemesterProject\ChessUI\obj\Debug\net9.0\refint\ChessUI.dll
