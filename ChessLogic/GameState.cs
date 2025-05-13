@@ -8,6 +8,7 @@ public class GameState{
     public Board Board { get; }
     public Player CurrentPlayer { get; private set; }
     public Result Result { get; private set; } = null;
+    private int FiftyMoveCounter = 0;
 
     public GameState(Player player, Board board){
         CurrentPlayer = player;
@@ -26,7 +27,13 @@ public class GameState{
 
     public void MakeMove(Move move){
         Board.SetEnPassantSquares(CurrentPlayer, null);
-        move.Execute(Board);
+        bool captureOrPawn = move.Execute(Board);
+        if(captureOrPawn){
+            FiftyMoveCounter = 0;
+        }
+        else{
+            FiftyMoveCounter++;
+        }
         CurrentPlayer = CurrentPlayer.Opponent();
         CheckForGameOver();
     }
@@ -53,9 +60,18 @@ public class GameState{
         else if(Board.InsufficientMaterial()){
             Result = Result.Draw(EndReason.InsufficientMaterial);
         }
+
+        else if(FiftyMoveRule()){
+            Result = Result.Draw(EndReason.FiftyMoveRule);
+        }
     }
 
     public bool IsGameOver(){
         return Result != null;
+    }
+
+    public bool FiftyMoveRule(){
+        int fullMoves = FiftyMoveCounter/2;
+        return fullMoves >= 50;
     }
 }

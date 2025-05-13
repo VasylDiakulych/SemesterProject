@@ -15,7 +15,7 @@ public abstract class Move{
     public abstract MoveType Type { get; }
     public abstract Position FromPos { get; }
     public abstract Position ToPos { get; }
-    public abstract void Execute(Board board);
+    public abstract bool Execute(Board board);
     public virtual bool IsLegal(Board board){
         Player player = board[FromPos].Color;
         Board copy = board.Copy();
@@ -34,12 +34,15 @@ public class NormalMove : Move{
         ToPos = to;
     }
 
-    public override void Execute(Board board)
+    public override bool Execute(Board board)
     {
         Piece piece = board[FromPos];
+        bool capture = !board.IsEmpty(ToPos);
         board[ToPos] = piece;
         board[FromPos] = null;
         piece.HasMoved = true;
+
+        return capture || piece.Type == PieceType.Pawn;
     }
 } 
 
@@ -65,7 +68,7 @@ public class PawnPromotion : Move{
         };
     }
 
-    public override void Execute(Board board)
+    public override bool Execute(Board board)
     {
         Piece pawn = board[FromPos];
         board[FromPos] = null;
@@ -73,6 +76,8 @@ public class PawnPromotion : Move{
         Piece newPiece = createPromotionPiece(pawn.Color);
         newPiece.HasMoved = true;
         board[ToPos] = newPiece;
+        
+        return true;
     }
 
 }
@@ -123,10 +128,11 @@ public class Castle : Move{
         }
     }
 
-    public override void Execute(Board board)
+    public override bool Execute(Board board)
     {
         new NormalMove(FromPos, ToPos).Execute(board);
         new NormalMove(rookFromPos, rookToPos).Execute(board);
+        return false;
     }
 
     public override bool IsLegal(Board board)
@@ -167,15 +173,16 @@ public class DoublePawn : Move{
         enPassantSquare = new Position((from.Row + to.Row)/2 , from.Column);
     }
 
-    public override void Execute(Board board)
+    public override bool Execute(Board board)
     {
         Player player = board[FromPos].Color;
         board.SetEnPassantSquares(player, enPassantSquare);
         new NormalMove(FromPos, ToPos).Execute(board);
+        return true;
     }
 }
 
-public class EnPassant : Move{
+public class EnPassant : Move{ 
     public override MoveType Type => MoveType.EnPassant;
     public override Position FromPos { get; }
     public override Position ToPos { get; }
@@ -188,9 +195,10 @@ public class EnPassant : Move{
         capturePos = new Position(from.Row, to.Column);
     }
 
-    public override void Execute(Board board)
+    public override bool Execute(Board board)
     {
         new NormalMove(FromPos, ToPos).Execute(board);
         board[capturePos] = null;
+        return true;
     }
 }
