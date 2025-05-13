@@ -286,42 +286,68 @@ class PromotionWindow : Gtk.Window {
     public event Action<PieceType> PieceSelected;
 
     public PromotionWindow(Player color) : base("Promotion"){
-        SetDefaultSize(72, 72*4);
+        SetDefaultSize(72, 72*4 + 36);
         SetPosition(WindowPosition.Mouse);
-        DeleteEvent += (o, args) => Application.Quit();
+        Resizable = false;
+        Decorated = false;
+        DeleteEvent += (o, args) => this.Hide();
 
-        Grid grid = new Grid();
-        grid.RowSpacing = 0;
-        grid.ColumnSpacing = 0;
-        Add(grid);
+        DrawingArea drawingArea = new DrawingArea();
+        drawingArea.SetSizeRequest(20, 72*4 + 36);
+        drawingArea.Drawn += (o, args) => DrawPieces(args.Cr, color);
+        drawingArea.ButtonPressEvent += OnButtonPress;
+        drawingArea.Events |= Gdk.EventMask.ButtonPressMask;
 
-        string imageQ = "Queen" + (color == Player.White ? "W" : "B") + ".png";
-        string pathQ = System.IO.Path.Combine("Assets", imageQ);
-        Image QueenImage = new Image(pathQ);
-        EventBox eventBoxQ = new EventBox();
-        eventBoxQ.Add(QueenImage);
-        eventBoxQ.ButtonPressEvent += QueenSelected;
+        Add(drawingArea);
+        ShowAll();
+    }
 
-        string imageR = "Rook" + (color == Player.White ? "W" : "B") + ".png";
-        string pathR = System.IO.Path.Combine("Assets", imageR);
-        Image RookImage = new Image(pathR);
-        EventBox eventBoxR = new EventBox();
-        eventBoxR.Add(RookImage);
-        eventBoxR.ButtonPressEvent += RookSelected;
-        
-        string imageB = "Bishop" + (color == Player.White ? "W" : "B") + ".png";
-        string pathB = System.IO.Path.Combine("Assets", imageB);
-        Image BishopImage = new Image(pathB);
-        EventBox eventBoxB = new EventBox();
-        eventBoxB.Add(BishopImage);
-        eventBoxB.ButtonPressEvent += BishopSelected;
+    private void DrawPieces(Cairo.Context cr, Player color)
+    {
+        PieceType[] promPieces = [PieceType.Queen, PieceType.Rook, PieceType.Bishop, PieceType.Knight];
 
-        string imageN = "Knight" + (color == Player.White ? "W" : "B") + ".png";
-        string pathN = System.IO.Path.Combine("Assets", imageN);
-        Image KnightImage = new Image(pathN);
-        EventBox eventBoxN = new EventBox();
-        eventBoxN.Add(KnightImage);
-        eventBoxN.ButtonPressEvent += KnightSelected;
+        for (int i = 0; i < promPieces.Length; i++)
+        {
+            PieceType piece = promPieces[i];
+            string filename = piece + (color == Player.White ? "W" : "B") + ".png";
+            string path = System.IO.Path.Combine("Assets", filename);
+
+            Pixbuf pixbuf = new Pixbuf(path);
+            Gdk.CairoHelper.SetSourcePixbuf(cr, pixbuf, 36, i * 72);
+            cr.Paint();
+        }
+        string pathButton = System.IO.Path.Combine("Assets", "BACK.png");
+        Pixbuf pixbufButton = new Pixbuf(pathButton);
+        Gdk.CairoHelper.SetSourcePixbuf(cr, pixbufButton, 36, promPieces.Length * 72);
+        cr.Paint();
+
+    }
+
+    private void OnButtonPress(object o, ButtonPressEventArgs args)
+    {
+        double x = args.Event.X;
+        double y = args.Event.Y;
+
+        int index = (int) y/72;
+        if(index >= 0 && index <= 3){
+            switch(index){
+                case 0:
+                    QueenSelected(o, args);
+                    break;
+                case 1:
+                    RookSelected(o, args);
+                    break;
+                case 2:
+                    BishopSelected(o, args);
+                    break;
+                default:
+                    KnightSelected(o, args);
+                    break;
+            };
+        }
+        else{
+            this.Hide();
+        }
     }
 
     public void QueenSelected(object o, ButtonPressEventArgs args){
