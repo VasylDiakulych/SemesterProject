@@ -9,10 +9,16 @@ public class GameState{
     public Player CurrentPlayer { get; private set; }
     public Result Result { get; private set; } = null;
     private int FiftyMoveCounter = 0;
+    private string stateString;
+    private readonly Dictionary<string, int> stateHistory = new Dictionary<string, int>();
 
     public GameState(Player player, Board board){
         CurrentPlayer = player;
         Board = board;
+
+        stateString = new StateString(CurrentPlayer, board).ToString();
+
+        stateHistory[stateString] = 1;
     }
 
     public IEnumerable<Move> LegalMovesForPiece(Position pos){
@@ -30,11 +36,13 @@ public class GameState{
         bool captureOrPawn = move.Execute(Board);
         if(captureOrPawn){
             FiftyMoveCounter = 0;
+            stateHistory.Clear();
         }
         else{
             FiftyMoveCounter++;
         }
         CurrentPlayer = CurrentPlayer.Opponent();
+        updateStateString();
         CheckForGameOver();
     }
 
@@ -64,6 +72,9 @@ public class GameState{
         else if(FiftyMoveRule()){
             Result = Result.Draw(EndReason.FiftyMoveRule);
         }
+        else if(ThreefoldRepetition()){
+            Result = Result.Draw(EndReason.ThreefoldRepetition);
+        }
     }
 
     public bool IsGameOver(){
@@ -73,5 +84,20 @@ public class GameState{
     public bool FiftyMoveRule(){
         int fullMoves = FiftyMoveCounter/2;
         return fullMoves >= 50;
+    }
+
+    public void updateStateString(){
+        stateString = new StateString(CurrentPlayer, Board).ToString();
+
+        if(!stateHistory.ContainsKey(stateString)){
+            stateHistory[stateString] = 1;
+        }
+        else{
+            stateHistory[stateString]++;
+        }
+    }
+
+    public bool ThreefoldRepetition(){
+        return stateHistory[stateString] >= 3;
     }
 }

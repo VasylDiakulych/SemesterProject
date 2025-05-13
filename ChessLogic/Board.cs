@@ -1,4 +1,6 @@
 
+using System.Drawing;
+
 namespace ChessLogic;
 
 public class Board{
@@ -167,5 +169,82 @@ public class Board{
     private Position FindPiece(Player color, PieceType type){
         return PiecePosCol(color).First(pos => this[pos].Type == type);
     }
+    
+    private bool IsUnmovedKingAndRook(Position kingPos, Position rookPos){
+        if(IsEmpty(kingPos) || IsEmpty(rookPos)){
+            return false;
+        }
 
+        Piece king = this[kingPos];
+        Piece rook = this[rookPos];
+        return (king.Type == PieceType.King && rook.Type == PieceType.Rook) && !king.HasMoved && !rook.HasMoved;
+    }
+
+    private Position findRook(Position from, Direction dir){
+        Player color = this[from].Color;
+        while(this[from] == null || this[from].Type != PieceType.Rook || this[from].Color != color){
+            from += dir;
+
+            if(!IsInside(from)){
+                return null;
+            }
+        }
+        return from;
+    }
+
+    public bool CastleRightKS(Player player){
+        Position kingPos = FindPiece(player, PieceType.King);
+        Position? rookPos = findRook(kingPos, Direction.East);
+        if(rookPos == null){return false;}
+
+        if(IsUnmovedKingAndRook(kingPos, rookPos)){
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
+
+    public bool CastleRightQS(Player player){
+        Position kingPos = FindPiece(player, PieceType.King);
+        Position? rookPos = findRook(kingPos, Direction.West);
+        if(rookPos == null){return false;}
+
+        if(IsUnmovedKingAndRook(kingPos, rookPos)){
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
+
+    private bool HasPawnInPosition(Player player, Position[] pawnPositions, Position enPassantSquare){
+        foreach(Position pos in pawnPositions.Where(IsInside)){
+            Piece piece = this[pos];
+            if(piece == null || piece.Color == player.Opponent() || piece.Type != PieceType.Pawn){
+                continue;
+            }
+
+            EnPassant move = new EnPassant(pos, enPassantSquare);
+            if(move.IsLegal(this)){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public bool CanCaptureEnPassant(Player player){
+        Position enPassantSquare = GetEnPassantSquares(player.Opponent());
+        if(enPassantSquare == null){
+            return false;
+        }
+        
+        Position[] pawnPositions = player switch{
+            Player.White => [enPassantSquare + Direction.SouthWest, enPassantSquare + Direction.SouthEast],
+            Player.Black => [enPassantSquare + Direction.NorthWest, enPassantSquare + Direction.NorthEast],
+            _ => Array.Empty<Position>()
+        };
+
+        return HasPawnInPosition(player, pawnPositions, enPassantSquare);
+    }
 }
