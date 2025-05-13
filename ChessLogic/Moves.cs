@@ -154,3 +154,43 @@ public class Castle : Move{
 
 }
 
+public class DoublePawn : Move{
+    public override MoveType Type => MoveType.DoublePawn;
+    public override Position FromPos { get; }
+    public override Position ToPos { get; }
+
+    private readonly Position enPassantSquare;
+
+    public DoublePawn(Position from, Position to){
+        FromPos = from;
+        ToPos = to;
+        enPassantSquare = new Position((from.Row + to.Row)/2 , from.Column);
+    }
+
+    public override void Execute(Board board)
+    {
+        Player player = board[FromPos].Color;
+        board.SetEnPassantSquares(player, enPassantSquare);
+        new NormalMove(FromPos, ToPos).Execute(board);
+    }
+}
+
+public class EnPassant : Move{
+    public override MoveType Type => MoveType.EnPassant;
+    public override Position FromPos { get; }
+    public override Position ToPos { get; }
+
+    private readonly Position capturePos;
+
+    public EnPassant(Position from, Position to){
+        FromPos = from;
+        ToPos = to;
+        capturePos = new Position(from.Row, to.Column);
+    }
+
+    public override void Execute(Board board)
+    {
+        new NormalMove(FromPos, ToPos).Execute(board);
+        board[capturePos] = null;
+    }
+}

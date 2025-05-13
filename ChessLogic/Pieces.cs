@@ -105,7 +105,7 @@ public class Pawn : Piece{
 
             Position twoMovesPos = from + 2*forward;
             if(!HasMoved && CanMoveTo(twoMovesPos, board)){
-                yield return new NormalMove(from, twoMovesPos);
+                yield return new DoublePawn(from, twoMovesPos);
             }
         }
     }
@@ -113,7 +113,10 @@ public class Pawn : Piece{
     private IEnumerable<Move> DiagonalMoves(Position from, Board board){
         foreach(Direction dir in new Direction[]{Direction.West, Direction.East}){
             Position to = from + forward + dir;
-
+            if(to == board.GetEnPassantSquares(Color.Opponent())){
+                yield return new EnPassant(from, to);
+            }
+            else 
             if(CanCaptureAt(to, board)){
                 if(to.Row == 0 || to.Row == Board.BoardSize - 1){
                     foreach (Move move in PromotionMoves(from, to)){

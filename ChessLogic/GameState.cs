@@ -1,4 +1,6 @@
 
+using System.Diagnostics;
+
 namespace ChessLogic;
 
 public class GameState{
@@ -23,6 +25,7 @@ public class GameState{
     }
 
     public void MakeMove(Move move){
+        Board.SetEnPassantSquares(CurrentPlayer, null);
         move.Execute(Board);
         CurrentPlayer = CurrentPlayer.Opponent();
         CheckForGameOver();

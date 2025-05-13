@@ -5,6 +5,11 @@ public class Board{
     public static int BoardSize { get; set; }
     private readonly Piece[,] pieces = new Piece[BoardSize, BoardSize];
 
+    private readonly Dictionary<Player, Position> EnPassantSquares = new Dictionary<Player, Position>{
+        {Player.White, null},
+        {Player.Black, null}
+    };
+
     public Piece this[int row, int col]{
 
         get{ return pieces[row, col]; }
@@ -16,6 +21,14 @@ public class Board{
         get{ return pieces[pos.Row, pos.Column]; }
         set{ pieces[pos.Row, pos.Column] = value; }
 
+    }
+
+    public Position GetEnPassantSquares(Player player){
+        return EnPassantSquares[player];
+    }
+
+    public void SetEnPassantSquares(Player player, Position position){
+        EnPassantSquares[player] = position;
     }
 
     public static Board Initial(string startingPos, int boardSize = 8 ){
