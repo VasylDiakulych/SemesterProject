@@ -4,16 +4,15 @@ using Gtk;
 using Cairo;
 using ChessLogic;
 
-public class MainMenuWindow : Gtk.Window
-{
+public class MainMenuWindow : Gtk.Window {
     public MainMenuWindow() : base("Chess")
     {
-        SetDefaultSize(300, 300);
+        SetDefaultSize(500, 500);
         SetPosition(WindowPosition.Center);
         Icon = new Pixbuf("Assets/icon.png");
         DeleteEvent += (o, args) => Application.Quit();
 
-        VBox vbox = new VBox(true, 10){
+        Box box = new Box(Orientation.Vertical, 10){
             BorderWidth = 20
         };
 
@@ -31,11 +30,11 @@ public class MainMenuWindow : Gtk.Window
         Button loadPosition = new Button("New game with custom position");
         loadPosition.Clicked += (sender, e) => OnLoadPositionClicked ();
 
-        vbox.PackStart(newGameButton, true, true, 0);
-        vbox.PackStart(loadPosition, true, true, 0);
-        vbox.PackStart(quitButton, true, true, 0);
+        box.PackStart(newGameButton, true, true, 10);
+        box.PackStart(loadPosition, true, true, 10);
+        box.PackStart(quitButton, true, true, 10);
 
-        Add(vbox);
+        Add(box);
         ShowAll();
     }
 
@@ -76,6 +75,54 @@ public class MainMenuWindow : Gtk.Window
             }
         }
         fileChooser.Destroy();
+    }
+}
+
+public class GameEndWindow : Gtk.Window{
+    public GameEndWindow(ChessLogic.Result result) : base("Chess"){
+        SetDefaultSize(500, 500);
+        SetPosition(WindowPosition.Center);
+        Icon = new Pixbuf("Assets/icon.png");
+
+        string endString = "";
+        if(result.Reason == EndReason.Checkmate){
+            endString += result.Winner.ToString() + " won!";
+        }
+        else{
+            endString += "Draw, " + result.Reason.ToString();
+        }
+
+        Label endLabel = new Label(endString);
+        
+        Button quitButton = new Button("Quit");
+        quitButton.Clicked += (sender, e) => Application.Quit();
+
+        Button newGameButton = new Button("New Game");
+        newGameButton.Clicked += (sender, e) =>
+        {
+          MainWindow gameWindow = new MainWindow();
+          gameWindow.ShowAll();
+          this.Hide();
+        };
+
+        Button mainMenuButton = new Button("Main Menu");
+        mainMenuButton.Clicked += (sender, e) =>
+        {
+            MainMenuWindow mainMenu = new MainMenuWindow();
+            mainMenu.ShowAll();
+            this.Hide();
+        };
+
+        Box box = new Box(Orientation.Vertical, 20);
+        
+        box.PackStart(endLabel, true, true, 10);
+        box.PackStart(newGameButton, true, true, 10);
+        box.PackStart(mainMenuButton, true, true, 10);
+        box.PackStart(quitButton, true, true, 10);
+        
+        Add(box);
+
+        DeleteEvent += (o, args) => Application.Quit();
     }
 }
 
@@ -182,7 +229,13 @@ class MainWindow : Gtk.Window {
         selectedPiece = null;
 
         if (CachedMoves.TryGetValue(pos, out Move move)){
-            HandleMove(move);
+
+            if(move.Type == MoveType.PawnPromotion){
+                HandlePromotion(move.FromPos, move.ToPos);
+            }
+            else{ 
+                HandleMove(move);
+            }
         }
 
         ClearHighlights();
@@ -191,10 +244,22 @@ class MainWindow : Gtk.Window {
     private void HandleMove(Move move){
         game.MakeMove(move);
         if(game.Result != null){
-            Application.Quit();
+            GameEndWindow endWindow = new(game.Result);
+            this.Hide();
+            endWindow.ShowAll();
             Console.WriteLine($"The result is: {game.Result.Reason}");
         }
         QueueDraw();
+    }
+
+    private void HandlePromotion(Position from, Position to){
+        PromotionWindow window = new PromotionWindow(game.CurrentPlayer);
+        window.ShowAll();
+        window.PieceSelected += type => {
+            window.Hide();
+            Move promMove = new PawnPromotion(from, to, type);
+            HandleMove(promMove);
+        };
     }
 
     private void ClearHighlights()
@@ -214,6 +279,65 @@ class MainWindow : Gtk.Window {
     protected override bool OnDeleteEvent(Event e) {
         Application.Quit();
         return true;
+    }
+}
+
+class PromotionWindow : Gtk.Window {
+    public event Action<PieceType> PieceSelected;
+
+    public PromotionWindow(Player color) : base("Promotion"){
+        SetDefaultSize(72, 72*4);
+        SetPosition(WindowPosition.Mouse);
+        DeleteEvent += (o, args) => Application.Quit();
+
+        Grid grid = new Grid();
+        grid.RowSpacing = 0;
+        grid.ColumnSpacing = 0;
+        Add(grid);
+
+        string imageQ = "Queen" + (color == Player.White ? "W" : "B") + ".png";
+        string pathQ = System.IO.Path.Combine("Assets", imageQ);
+        Image QueenImage = new Image(pathQ);
+        EventBox eventBoxQ = new EventBox();
+        eventBoxQ.Add(QueenImage);
+        eventBoxQ.ButtonPressEvent += QueenSelected;
+
+        string imageR = "Rook" + (color == Player.White ? "W" : "B") + ".png";
+        string pathR = System.IO.Path.Combine("Assets", imageR);
+        Image RookImage = new Image(pathR);
+        EventBox eventBoxR = new EventBox();
+        eventBoxR.Add(RookImage);
+        eventBoxR.ButtonPressEvent += RookSelected;
+        
+        string imageB = "Bishop" + (color == Player.White ? "W" : "B") + ".png";
+        string pathB = System.IO.Path.Combine("Assets", imageB);
+        Image BishopImage = new Image(pathB);
+        EventBox eventBoxB = new EventBox();
+        eventBoxB.Add(BishopImage);
+        eventBoxB.ButtonPressEvent += BishopSelected;
+
+        string imageN = "Knight" + (color == Player.White ? "W" : "B") + ".png";
+        string pathN = System.IO.Path.Combine("Assets", imageN);
+        Image KnightImage = new Image(pathN);
+        EventBox eventBoxN = new EventBox();
+        eventBoxN.Add(KnightImage);
+        eventBoxN.ButtonPressEvent += KnightSelected;
+    }
+
+    public void QueenSelected(object o, ButtonPressEventArgs args){
+        PieceSelected?.Invoke(PieceType.Queen);
+    }
+
+    public void KnightSelected(object o, ButtonPressEventArgs args){
+        PieceSelected?.Invoke(PieceType.Knight);
+    }
+
+    public void BishopSelected(object o, ButtonPressEventArgs args){
+        PieceSelected?.Invoke(PieceType.Bishop);
+    }
+
+    public void RookSelected(object o, ButtonPressEventArgs args){
+        PieceSelected?.Invoke(PieceType.Rook);
     }
 }
 
