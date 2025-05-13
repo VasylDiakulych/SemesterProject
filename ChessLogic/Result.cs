@@ -6,7 +6,6 @@ public enum EndReason{
     FiftyMoveRule,
     InsufficientMaterial,
     ThreefoldRepetition,
-    Agreement 
 }
 
 public class Result{
