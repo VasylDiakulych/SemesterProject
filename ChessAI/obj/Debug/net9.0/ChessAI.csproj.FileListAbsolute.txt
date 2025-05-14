@@ -1,0 +1,15 @@
+C:\Users\Diakjulych Vasyl\Desktop\SemesterProject\ChessAI\bin\Debug\net9.0\ChessAI.exe
+C:\Users\Diakjulych Vasyl\Desktop\SemesterProject\ChessAI\bin\Debug\net9.0\ChessAI.deps.json
+C:\Users\Diakjulych Vasyl\Desktop\SemesterProject\ChessAI\bin\Debug\net9.0\ChessAI.runtimeconfig.json
+C:\Users\Diakjulych Vasyl\Desktop\SemesterProject\ChessAI\bin\Debug\net9.0\ChessAI.dll
+C:\Users\Diakjulych Vasyl\Desktop\SemesterProject\ChessAI\bin\Debug\net9.0\ChessAI.pdb
+C:\Users\Diakjulych Vasyl\Desktop\SemesterProject\ChessAI\obj\Debug\net9.0\ChessAI.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Diakjulych Vasyl\Desktop\SemesterProject\ChessAI\obj\Debug\net9.0\ChessAI.AssemblyInfoInputs.cache
+C:\Users\Diakjulych Vasyl\Desktop\SemesterProject\ChessAI\obj\Debug\net9.0\ChessAI.AssemblyInfo.cs
+C:\Users\Diakjulych Vasyl\Desktop\SemesterProject\ChessAI\obj\Debug\net9.0\ChessAI.csproj.CoreCompileInputs.cache
+C:\Users\Diakjulych Vasyl\Desktop\SemesterProject\ChessAI\obj\Debug\net9.0\ChessAI.sourcelink.json
+C:\Users\Diakjulych Vasyl\Desktop\SemesterProject\ChessAI\obj\Debug\net9.0\ChessAI.dll
+C:\Users\Diakjulych Vasyl\Desktop\SemesterProject\ChessAI\obj\Debug\net9.0\refint\ChessAI.dll
+C:\Users\Diakjulych Vasyl\Desktop\SemesterProject\ChessAI\obj\Debug\net9.0\ChessAI.pdb
+C:\Users\Diakjulych Vasyl\Desktop\SemesterProject\ChessAI\obj\Debug\net9.0\ChessAI.genruntimeconfig.cache
+C:\Users\Diakjulych Vasyl\Desktop\SemesterProject\ChessAI\obj\Debug\net9.0\ref\ChessAI.dll
