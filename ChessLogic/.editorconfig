@@ -2,3 +2,6 @@
 
 # CS0612: Type or member is obsolete
 dotnet_diagnostic.CS0612.severity = none
+
+# CS8600: Converting null literal or possible null value to non-nullable type.
+dotnet_diagnostic.CS8600.severity = none

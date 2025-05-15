@@ -20,9 +20,13 @@ public class MainMenuWindow : Gtk.Window {
         Button newGameButton = new Button("New Game");
         newGameButton.Clicked += (sender, e) =>
         {
-            MainWindow gameWindow = new MainWindow();
-            gameWindow.ShowAll();
+            ChessSetupDialog dialog = new ChessSetupDialog();
+            while (dialog.Visible){
+                Application.RunIteration();
+            }
             this.Hide();
+            MainWindow gameWindow = new MainWindow(dialog.Opponent, dialog.Side);
+            gameWindow.ShowAll();
         };
 
         Button quitButton = new Button("Quit");
@@ -52,15 +56,20 @@ public class MainMenuWindow : Gtk.Window {
         filter.Name = "Valid position files (*.txt)";
         filter.AddPattern("*.txt");
         fileChooser.AddFilter(filter);
+        
+        ChessSetupDialog dialog = new ChessSetupDialog();
+        this.Hide();
+        while (dialog.Visible){
+            Application.RunIteration();
+        }
 
         if (fileChooser.Run() == (int)ResponseType.Accept)
         {
             string filePath = fileChooser.Filename;
 
             try{
-                MainWindow customGameWindow = new MainWindow(filePath);
+                MainWindow customGameWindow = new MainWindow(dialog.Opponent, dialog.Side, filePath);
                 customGameWindow.ShowAll();
-                this.Hide();
             }
             catch (Exception ex){
                 Console.WriteLine("Error loading position: " + ex.Message);
@@ -76,6 +85,85 @@ public class MainMenuWindow : Gtk.Window {
             }
         }
         fileChooser.Destroy();
+    }
+
+}
+
+public class ChessSetupDialog : Gtk.Window{
+    public Opponent Opponent { get; private set; }
+    public Player Side { get; private set; }
+
+    private ComboBoxText opponentCombo;
+    private ComboBoxText sideCombo;
+    private Button confirmButton;
+
+    public ChessSetupDialog() : base("Choose Your Opponent and Side")
+    {
+        SetDefaultSize(300, 200);
+        Icon = new Pixbuf("Assets/icon.png");
+        SetPosition(WindowPosition.Center);
+
+        opponentCombo = new ComboBoxText();
+        foreach(Opponent opponent in Enum.GetValues(typeof(Opponent))){
+            opponentCombo.AppendText(opponent.ToString());
+        }
+        opponentCombo.Active = 0; 
+
+        sideCombo = new ComboBoxText();
+        sideCombo.AppendText("White");
+        sideCombo.AppendText("Black");
+        sideCombo.AppendText("Random");
+        sideCombo.Active = 2; 
+
+        confirmButton = new Button("Confirm");
+        confirmButton.Clicked += OnConfirmButtonClicked;
+
+        Box box = new Box(Orientation.Vertical, 10);
+        box.PackStart(new Label("Opponent:"), true, true, 0);
+        box.PackStart(opponentCombo, true, true, 0);
+        box.PackStart(new Label("Side:"), true, true, 0);
+        box.PackStart(sideCombo, true, true, 0);
+        box.PackStart(confirmButton, true, true, 0);
+
+        Add(box);
+
+        ShowAll();
+    }
+
+    private void OnConfirmButtonClicked(object sender, EventArgs e)
+    {
+        switch(opponentCombo.ActiveText){
+            case "HumanPlayer":
+                Opponent = Opponent.HumanPlayer;
+                break;
+            case "RandomAI":
+                Opponent = Opponent.RandomAI;
+                break;
+            case "MiniMaxAI":
+                Opponent = Opponent.MiniMaxAI;
+                break;
+            default:
+                Opponent = Opponent.HumanPlayer;
+                break;
+        }
+        
+        switch(opponentCombo.ActiveText){
+            case "White":
+                Side = Player.White;
+                break;
+            case "Black":
+                Side = Player.Black;
+                break;
+            case "Random":
+                var number = new Random();
+                Side = (number.Next(0, 2) == 0) ? Player.White : Player.Black;
+                break;
+            default:
+                Side = Player.White;
+                break;
+        }
+
+        Destroy();
     }
 }
 
@@ -98,14 +186,6 @@ public class GameEndWindow : Gtk.Window{
         Button quitButton = new Button("Quit");
         quitButton.Clicked += (sender, e) => Application.Quit();
 
-        Button newGameButton = new Button("New Game");
-        newGameButton.Clicked += (sender, e) =>
-        {
-          MainWindow gameWindow = new MainWindow();
-          gameWindow.ShowAll();
-          this.Hide();
-        };
-
         Button mainMenuButton = new Button("Main Menu");
         mainMenuButton.Clicked += (sender, e) =>
         {
@@ -117,7 +197,6 @@ public class GameEndWindow : Gtk.Window{
         Box box = new Box(Orientation.Vertical, 20);
         
         box.PackStart(endLabel, true, true, 10);
-        box.PackStart(newGameButton, true, true, 10);
         box.PackStart(mainMenuButton, true, true, 10);
         box.PackStart(quitButton, true, true, 10);
         
@@ -131,21 +210,20 @@ class MainWindow : Gtk.Window {
     private Pixbuf backgroundImage;
     private DrawingArea drawingArea;
     private const int squareSize = 72;
-    GameState game;
-
-    private Position selectedPiece;
+    private GameState game;
+    private Position? selectedPiece;
     private readonly Dictionary<Position, Move> CachedMoves = new();
 
     private Board board = new();
 
-    public MainWindow(string startingPositionPath = "ChessLogic\\standardPosition.txt") : base("Chess")
+    public MainWindow(Opponent opponent = Opponent.HumanPlayer, Player player = Player.White, string startingPositionPath = "ChessLogic\\standardPosition.txt") : base("Chess")
     {
         SetDefaultSize(594, 594);
         SetPosition(WindowPosition.Center);
         Icon = new Pixbuf(System.IO.Path.Combine("Assets", "icon.png"));
 
         board = Board.Initial(startingPositionPath);
-        game = new(Player.White, board); 
+        game = new(Player.White, board, opponent); 
 
         drawingArea = new DrawingArea();
         Add(drawingArea);
@@ -236,6 +314,10 @@ class MainWindow : Gtk.Window {
             }
             else{ 
                 HandleMove(move);
+            }
+
+            if(game.Result == null && game.Opponent != Opponent.HumanPlayer){
+                game.Ai.HandleMove();
             }
         }
 

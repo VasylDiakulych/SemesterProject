@@ -7,14 +7,20 @@ public class GameState{
 
     public Board Board { get; }
     public Player CurrentPlayer { get; private set; }
+    public Opponent Opponent { get; }
+    public ChessAI Ai;
+    public Player OpponentColor { get; }
     public Result Result { get; private set; } = null;
     private int FiftyMoveCounter = 0;
     private string stateString;
     private readonly Dictionary<string, int> stateHistory = new Dictionary<string, int>();
 
-    public GameState(Player player, Board board){
+    public GameState(Player player, Board board, Opponent opponent){
         CurrentPlayer = player;
         Board = board;
+        Opponent = opponent;
+        Ai = ChessAI.ReturnAI(opponent, this);
+        OpponentColor = player.Opponent();
 
         stateString = new StateString(CurrentPlayer, board).ToString();
 
