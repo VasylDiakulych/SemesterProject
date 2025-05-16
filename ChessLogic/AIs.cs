@@ -41,7 +41,7 @@ public class RandomAI : ChessAI
 
     public override void HandleMove()
     {
-        if(game.CurrentPlayer == game.OpponentColor){
+        if(game.Result == null && game.CurrentPlayer == game.OpponentColor){
             game.MakeMove(ChooseMove());
         }
     }

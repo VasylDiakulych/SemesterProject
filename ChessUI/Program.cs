@@ -58,20 +58,22 @@ public class MainMenuWindow : Gtk.Window {
         fileChooser.AddFilter(filter);
         
         ChessSetupDialog dialog = new ChessSetupDialog();
-        this.Hide();
         while (dialog.Visible){
             Application.RunIteration();
         }
+        this.Hide();
 
         if (fileChooser.Run() == (int)ResponseType.Accept)
         {
             string filePath = fileChooser.Filename;
 
-            try{
+            try
+            {
                 MainWindow customGameWindow = new MainWindow(dialog.Opponent, dialog.Side, filePath);
                 customGameWindow.ShowAll();
             }
-            catch (Exception ex){
+            catch (Exception ex)
+            {
                 Console.WriteLine("Error loading position: " + ex.Message);
                 MessageDialog errorDialog = new MessageDialog(
                     this,
@@ -132,38 +134,24 @@ public class ChessSetupDialog : Gtk.Window{
 
     private void OnConfirmButtonClicked(object sender, EventArgs e)
     {
-        switch(opponentCombo.ActiveText){
-            case "HumanPlayer":
-                Opponent = Opponent.HumanPlayer;
-                break;
-            case "RandomAI":
-                Opponent = Opponent.RandomAI;
-                break;
-            case "MiniMaxAI":
-                Opponent = Opponent.MiniMaxAI;
-                break;
-            default:
-                Opponent = Opponent.HumanPlayer;
-                break;
-        }
-        
-        switch(opponentCombo.ActiveText){
-            case "White":
-                Side = Player.White;
-                break;
-            case "Black":
-                Side = Player.Black;
-                break;
-            case "Random":
-                var number = new Random();
-                Side = (number.Next(0, 2) == 0) ? Player.White : Player.Black;
-                break;
-            default:
-                Side = Player.White;
-                break;
-        }
+        Opponent = opponentCombo.ActiveText switch
+        {
+            "HumanPlayer" => Opponent.HumanPlayer,
+            "RandomAI" => Opponent.RandomAI,
+            "MiniMaxAI" => Opponent.MiniMaxAI,
+            _ => Opponent.HumanPlayer,
+        };
 
-        Destroy();
+        var number = new Random();
+        Side = sideCombo.ActiveText switch
+        {
+            "White" => Player.White,
+            "Black" => Player.Black,
+            "Random" => (number.Next(0, 2) == 0) ? Player.White : Player.Black,
+            _ => Player.White
+        };
+
+        Hide();
     }
 }
 
@@ -316,7 +304,7 @@ class MainWindow : Gtk.Window {
                 HandleMove(move);
             }
 
-            if(game.Result == null && game.Opponent != Opponent.HumanPlayer){
+            if(game.Opponent != Opponent.HumanPlayer){
                 game.Ai.HandleMove();
             }
         }
@@ -338,10 +326,18 @@ class MainWindow : Gtk.Window {
     private void HandlePromotion(Position from, Position to){
         PromotionWindow window = new PromotionWindow(game.CurrentPlayer);
         window.ShowAll();
-        window.PieceSelected += type => {
-            window.Hide();
+        window.PieceSelected += type =>
+        {
+            if (window.Visible){
+                window.Hide();
+            }
+            
             Move promMove = new PawnPromotion(from, to, type);
             HandleMove(promMove);
+            
+            if(game.Opponent != Opponent.HumanPlayer){
+                game.Ai.HandleMove();
+            }
         };
     }
 
