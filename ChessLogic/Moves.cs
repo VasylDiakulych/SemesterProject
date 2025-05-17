@@ -11,16 +11,32 @@ public enum MoveType{
     PawnPromotion
 }
 
-public abstract class Move{
+public abstract class Move
+{
     public abstract MoveType Type { get; }
     public abstract Position FromPos { get; }
     public abstract Position ToPos { get; }
     public abstract bool Execute(Board board);
-    public virtual bool IsLegal(Board board){
+    public virtual bool IsLegal(Board board)
+    {
         Player player = board[FromPos].Color;
         Board copy = board.Copy();
         Execute(copy);
         return !copy.IsInCheck(player);
+    }
+
+    public override string ToString()
+    {
+        string from = FromPos.ToAlgebraic(); 
+        string to = ToPos.ToAlgebraic();    
+
+        string promotionSuffix = "";
+        if (this is PawnPromotion promotion)
+        {
+            promotionSuffix = promotion.NewType.ToString().ToLower()[0].ToString(); 
+        }
+
+        return $"{from}{to}{promotionSuffix}";
     }
 }
 
@@ -41,6 +57,10 @@ public class NormalMove : Move{
         board[ToPos] = piece;
         board[FromPos] = null;
         piece.HasMoved = true;
+        if (piece.Type == PieceType.King)
+        {
+            board.updateKingPos(piece.Color, ToPos);
+        }
 
         return capture || piece.Type == PieceType.Pawn;
     }
@@ -51,7 +71,7 @@ public class PawnPromotion : Move{
     public override MoveType Type => MoveType.PawnPromotion;
     public override Position FromPos {get;}
     public override Position ToPos {get;}
-    private readonly PieceType NewType;
+    public readonly PieceType NewType;
 
     public PawnPromotion(Position from, Position to, PieceType newType){
         FromPos = from;

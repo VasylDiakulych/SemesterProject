@@ -5,7 +5,9 @@ namespace ChessLogic;
 
 public class Board{
     public static int BoardSize { get; set; }
-    private readonly Piece[,] pieces = new Piece[BoardSize, BoardSize];
+    private Piece[,] pieces = new Piece[BoardSize, BoardSize];
+    private Position wKingPos;
+    private Position bKingPos;
 
     private readonly Dictionary<Player, Position> EnPassantSquares = new Dictionary<Player, Position>{
         {Player.White, null},
@@ -18,10 +20,11 @@ public class Board{
         set{ pieces[row, col] = value; }
     }
 
-    public Piece this[Position pos]{
+    public Piece this[Position pos]
+    {
 
-        get{ return pieces[pos.Row, pos.Column]; }
-        set{ pieces[pos.Row, pos.Column] = value; }
+        get { return pieces[pos.Row, pos.Column]; }
+        set { pieces[pos.Row, pos.Column] = value; }
 
     }
 
@@ -41,42 +44,49 @@ public class Board{
     }
 
     //Adds pieces to the board as starting position. 
-    //As input takes path to .txt file, which contains the custom starting position 
-    private void AddStartPieces(string startingPos){
+    //As input takes path to .txt file, which contains the custom starting position
+    //It assumes that no EnPassant moves are available and all pieces haven't moved yet 
+    private void AddStartPieces(string startingPos)
+    {
         var lines = File.ReadAllLines(startingPos);
-        for(int i = 0; i < BoardSize; i++){
+        for (int i = 0; i < BoardSize; i++)
+        {
             string line = lines[i];
             char[] chars = line.ToCharArray();
-            for(int j = 0; j < BoardSize; j++){
-                
+            for (int j = 0; j < BoardSize; j++)
+            {
+
                 Player color;
 
-                if(char.IsLetter(chars[j])){
+                if (char.IsLetter(chars[j]))
+                {
                     color = char.IsLower(chars[j]) ? Player.Black : Player.White;
                 }
-                else{ continue; }
+                else { continue; }
 
-                switch(char.ToLower(chars[j])){
-                    case 'p':
-                        pieces[i, j] = new Pawn(color);
-                        break;
-                    case 'b':
-                        pieces[i, j] = new Bishop(color);
-                        break;
-                    case 'n':
-                        pieces[i, j] = new Knight(color);
-                        break;
-                    case 'r':
-                        pieces[i, j] = new Rook(color);
-                        break;
-                    case 'q':
-                        pieces[i, j] = new Queen(color);
-                        break;
-                    case 'k':
-                        pieces[i, j] = new King(color);
-                        break;
-                    default:
-                        break;
+                pieces[i, j] = char.ToLower(chars[j]) switch
+                {
+                    'b' => new Bishop(color),
+                    'n' => new Knight(color),
+                    'r' => new Rook(color),
+                    'q' => new Queen(color),
+                    'k' => new King(color),
+                    _ => new Pawn(color)
+                };
+
+                if (pieces[i, j].Type == PieceType.King)
+                {
+                    switch (pieces[i, j].Color)
+                    {
+                        case Player.White:
+                            wKingPos = new Position(i, j);
+                            break;
+                        case Player.Black:
+                            bKingPos = new Position(i, j);
+                            break;
+                        default:
+                            break;
+                    }
                 }
             }
         }
@@ -90,11 +100,27 @@ public class Board{
         return this[pos] == null;
     }
 
-    public IEnumerable<Position> PiecePositions(){
-        for(int r = 0; r < BoardSize; r++){
-            for(int c = 0; c < BoardSize; c++){
+    public void updateKingPos(Player color, Position newPos)
+    {
+        if (color == Player.White)
+        {
+            wKingPos = newPos;
+        }
+        else
+        {
+            bKingPos = newPos;
+        }
+    }
+
+    public IEnumerable<Position> PiecePositions()
+    {
+        for (int r = 0; r < BoardSize; r++)
+        {
+            for (int c = 0; c < BoardSize; c++)
+            {
                 Position pos = new Position(r, c);
-                if(this[pos] != null){
+                if (this[pos] != null)
+                {
                     yield return pos;
                 }
             }
@@ -106,18 +132,90 @@ public class Board{
         return positions.Where(pos => this[pos].Color == color);
     }
 
-    public bool IsInCheck(Player player){
-        return PiecePosCol(player.Opponent()).Any(pos =>{
-            Piece piece = this[pos];
-            return piece.CanCaptureKing(pos, this);
-        });
+    private Position findKing(Player color) {
+        return color == Player.White ? wKingPos : bKingPos;
+    }
+
+    public bool IsInCheck(Player player)
+    {
+        Position kingPos = findKing(player);
+
+        foreach (Direction dir in Direction.AllDirections)
+        {
+            Position newKingPos = kingPos + dir;
+            while (IsInside(newKingPos))
+            {
+                Piece piece = this[newKingPos];
+                if (piece == null) { newKingPos += dir; continue; }
+
+                if (piece.Color == player) { break; }
+
+                if ((piece.Type == PieceType.Bishop || piece.Type == PieceType.Rook || piece.Type == PieceType.Queen)
+                && piece.CanCaptureKing(newKingPos, this))
+                {
+                    return true;
+                }
+
+                break;
+            }
+        }
+
+        foreach (Direction vDir in new Direction[] { Direction.North, Direction.South })
+        {
+            foreach (Direction hDir in new Direction[] { Direction.West, Direction.East })
+            {
+                Position knightPos1 = kingPos + (2 * hDir + vDir);
+                Position knightPos2 = kingPos + (2 * vDir + hDir);
+
+                if (IsInside(knightPos1) && this[knightPos1] != null && this[knightPos1].Type == PieceType.Knight && this[knightPos1].Color != player)
+                {
+                    return true;
+                }
+                if (IsInside(knightPos2) && this[knightPos2] != null && this[knightPos2].Type == PieceType.Knight && this[knightPos2].Color != player)
+                {
+                    return true;
+                }
+            }
+        }
+
+        foreach (Direction dir in new Direction[] { Direction.NorthEast, Direction.NorthWest,
+                                                    Direction.SouthEast, Direction.SouthWest })
+        {
+            Position pos = kingPos + dir;
+
+            if (IsInside(pos) && this[pos] != null && this[pos].Type == PieceType.Pawn &&
+            this[pos].Color != player && this[pos].CanCaptureKing(pos, this))
+            {
+                return true;
+            }
+        }
+
+        foreach (Direction dir in Direction.AllDirections)
+        {
+            Position pos = kingPos + dir;
+
+            if (IsInside(pos) && this[pos] != null && this[pos].Type == PieceType.King && this[pos].Color != player)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public Board Copy(){
+
         Board copy = new Board();
         foreach (Position pos in PiecePositions()){
             copy[pos] = this[pos].Copy();
         }
+
+        copy.bKingPos = bKingPos;
+        copy.wKingPos = wKingPos;
+        
+        copy.SetEnPassantSquares(Player.White, EnPassantSquares[Player.White]);
+        copy.SetEnPassantSquares(Player.Black, EnPassantSquares[Player.Black]);
+
         return copy;
     }
 
@@ -177,7 +275,7 @@ public class Board{
 
         Piece king = this[kingPos];
         Piece rook = this[rookPos];
-        return (king.Type == PieceType.King && rook.Type == PieceType.Rook) && !king.HasMoved && !rook.HasMoved;
+        return king.Type == PieceType.King && rook.Type == PieceType.Rook && !king.HasMoved && !rook.HasMoved;
     }
 
     private Position findRook(Position from, Direction dir){
@@ -193,7 +291,7 @@ public class Board{
     }
 
     public bool CastleRightKS(Player player){
-        Position kingPos = FindPiece(player, PieceType.King);
+        Position kingPos = findKing(player);
         Position? rookPos = findRook(kingPos, Direction.East);
         if(rookPos == null){return false;}
 
@@ -206,7 +304,7 @@ public class Board{
     }
 
     public bool CastleRightQS(Player player){
-        Position kingPos = FindPiece(player, PieceType.King);
+        Position kingPos = findKing(player);
         Position? rookPos = findRook(kingPos, Direction.West);
         if(rookPos == null){return false;}
 

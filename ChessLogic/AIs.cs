@@ -11,14 +11,13 @@ public abstract class ChessAI{
     public abstract void HandleMove();
     
     public static ChessAI ReturnAI(Opponent aiType, GameState game) {
-        switch (aiType) {
-            case Opponent.RandomAI:
-                return new RandomAI(game);
-            case Opponent.MiniMaxAI:
-                return new MiniMaxAI(game);
-            default:
-                return new RandomAI(game);
+        return aiType switch
+        {
+            Opponent.RandomAI => new RandomAI(game),
+            Opponent.MiniMaxAI => new MiniMaxAI(game),
+            _ => new RandomAI(game),
         };
+        ;
     }
 }
 

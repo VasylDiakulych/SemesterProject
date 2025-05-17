@@ -149,12 +149,12 @@ public class Bishop : Piece{
 
     public override Player Color {get; }
 
-    private static readonly Direction[] dirs = new Direction[]{
+    private static readonly Direction[] dirs = [
         Direction.NorthWest,
         Direction.NorthEast,
         Direction.SouthWest,
         Direction.SouthEast
-    };
+    ];
 
     public Bishop(Player color){
         Color = color;

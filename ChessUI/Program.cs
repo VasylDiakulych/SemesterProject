@@ -195,14 +195,14 @@ public class GameEndWindow : Gtk.Window{
 }
 
 class MainWindow : Gtk.Window {
-    private Pixbuf backgroundImage;
-    private DrawingArea drawingArea;
+    private readonly Pixbuf backgroundImage;
+    private readonly DrawingArea drawingArea;
     private const int squareSize = 72;
-    private GameState game;
+    private readonly GameState game;
     private Position? selectedPiece;
     private readonly Dictionary<Position, Move> CachedMoves = new();
 
-    private Board board = new();
+    private readonly Board board = new();
 
     public MainWindow(Opponent opponent = Opponent.HumanPlayer, Player player = Player.White, string startingPositionPath = "ChessLogic\\standardPosition.txt") : base("Chess")
     {
@@ -211,7 +211,10 @@ class MainWindow : Gtk.Window {
         Icon = new Pixbuf(System.IO.Path.Combine("Assets", "icon.png"));
 
         board = Board.Initial(startingPositionPath);
-        game = new(Player.White, board, opponent); 
+        board[0, 5].HasMoved = true;
+        board[2, 2].HasMoved = true;
+        board[1, 3].HasMoved = true;
+        game = new(player, board, opponent); 
 
         drawingArea = new DrawingArea();
         Add(drawingArea);
@@ -221,6 +224,8 @@ class MainWindow : Gtk.Window {
         drawingArea.Drawn += OnDrawingAreaDrawn;
         drawingArea.ButtonPressEvent += OnButtonPressEvent;
         drawingArea.AddEvents((int)EventMask.ButtonPressMask);
+
+        if (game.Opponent != Opponent.HumanPlayer) { game.Ai.HandleMove(); }
 
         ShowAll();
     }
@@ -447,7 +452,8 @@ class PromotionWindow : Gtk.Window {
 }
 
 class Chess {
-    static void Main() {
+    static void Main()
+    {
         Application.Init();
         MainMenuWindow w = new();
         w.ShowAll();

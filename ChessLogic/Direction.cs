@@ -13,6 +13,17 @@ public class Direction{
     public readonly static Direction SouthEast = South + East;
     public readonly static Direction SouthWest = South + West;
 
+    public readonly static Direction[] AllDirections = [
+        North,
+        South,
+        West,
+        East,
+        NorthEast,
+        NorthWest,
+        SouthEast,
+        SouthWest
+    ];
+
     public int RowDelta { get; }
     public int ColumnDelta { get; }
 
