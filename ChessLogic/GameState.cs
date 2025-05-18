@@ -1,5 +1,6 @@
 
 using System.Diagnostics;
+using System.Dynamic;
 using System.Linq;
 
 namespace ChessLogic;
@@ -15,7 +16,7 @@ public class GameState
     public Result Result { get; private set; } = null;
     public int FiftyMoveCounter = 0;
     private string stateString;
-    private readonly Dictionary<string, int> stateHistory = new Dictionary<string, int>();
+    private Dictionary<string, int> stateHistory = new Dictionary<string, int>();
 
     public GameState(Player player, Board board, Opponent opponent, Player startingPlayer = Player.White)
     {
@@ -98,6 +99,18 @@ public class GameState
         {
             Result = Result.Draw(EndReason.ThreefoldRepetition);
         }
+    }
+
+    public GameState Copy()
+    {
+        GameState copy = new GameState(this.CurrentPlayer, Board.Copy(), this.Opponent, this.CurrentPlayer)
+        {
+            FiftyMoveCounter = this.FiftyMoveCounter,
+            stateHistory = this.stateHistory,
+            stateString = this.stateString
+        };
+
+        return copy;
     }
 
     public bool IsGameOver()

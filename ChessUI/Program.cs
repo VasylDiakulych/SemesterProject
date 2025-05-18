@@ -211,9 +211,6 @@ class MainWindow : Gtk.Window {
         Icon = new Pixbuf(System.IO.Path.Combine("Assets", "icon.png"));
 
         board = Board.Initial(startingPositionPath);
-        board[0, 5].HasMoved = true;
-        board[2, 2].HasMoved = true;
-        board[1, 3].HasMoved = true;
         game = new(player, board, opponent); 
 
         drawingArea = new DrawingArea();
