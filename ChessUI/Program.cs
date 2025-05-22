@@ -21,7 +21,10 @@ public class MainMenuWindow : Gtk.Window {
         newGameButton.Clicked += (sender, e) =>
         {
             ChessSetupDialog dialog = new ChessSetupDialog();
-            while (dialog.Visible){
+            dialog.DeleteEvent += (o, args) => Application.Quit();
+
+            while (dialog.Visible)
+            {
                 Application.RunIteration();
             }
             this.Hide();
@@ -58,7 +61,10 @@ public class MainMenuWindow : Gtk.Window {
         fileChooser.AddFilter(filter);
         
         ChessSetupDialog dialog = new ChessSetupDialog();
-        while (dialog.Visible){
+        dialog.DeleteEvent += (o, args) => Application.Quit();
+
+        while (dialog.Visible)
+        {
             Application.RunIteration();
         }
         this.Hide();
@@ -201,7 +207,6 @@ class MainWindow : Gtk.Window {
     private readonly GameState game;
     private Position? selectedPiece;
     private readonly Dictionary<Position, Move> CachedMoves = new();
-
     private readonly Board board = new();
 
     public MainWindow(Opponent opponent = Opponent.HumanPlayer, Player player = Player.White, string startingPositionPath = "ChessLogic\\standardPosition.txt") : base("Chess")
@@ -297,30 +302,59 @@ class MainWindow : Gtk.Window {
     private void OnToPosSel(Position pos){
         selectedPiece = null;
 
-        if (CachedMoves.TryGetValue(pos, out Move move)){
+        if (CachedMoves.TryGetValue(pos, out Move move))
+        {
 
-            if(move.Type == MoveType.PawnPromotion){
+            if (move.Type == MoveType.PawnPromotion)
+            {
                 HandlePromotion(move.FromPos, move.ToPos);
             }
-            else{ 
+            else
+            {
                 HandleMove(move);
             }
 
-            if(game.Opponent != Opponent.HumanPlayer){
-                game.Ai.HandleMove();
+            if (game.Result == null && game.Opponent != Opponent.HumanPlayer)
+            {
+                AIHandleMove();
             }
+
         }
 
         ClearHighlights();
     }
 
-    private void HandleMove(Move move){
+    private void AIHandleMove()
+    {
+        game.Ai.HandleMove();
+        QueueDraw();
+
+        if (game.Result != null)
+        {
+            GLib.Timeout.Add(500, () =>
+            {
+                GameEndWindow endWindow = new(game.Result);
+                this.Hide();
+                endWindow.ShowAll();
+                Console.WriteLine($"The result is: {game.Result.Reason}");
+                return false;
+            });
+        }
+    }
+
+    private void HandleMove(Move move)
+    {
         game.MakeMove(move);
-        if(game.Result != null){
-            GameEndWindow endWindow = new(game.Result);
-            this.Hide();
-            endWindow.ShowAll();
-            Console.WriteLine($"The result is: {game.Result.Reason}");
+        if (game.Result != null)
+        {
+            GLib.Timeout.Add(500, () =>
+            {
+                GameEndWindow endWindow = new(game.Result);
+                this.Hide();
+                endWindow.ShowAll();
+                Console.WriteLine($"The result is: {game.Result.Reason}");
+                return false;
+            });
         }
         QueueDraw();
     }
@@ -448,12 +482,16 @@ class PromotionWindow : Gtk.Window {
     }
 }
 
-class Chess {
+class Chess
+{
     static void Main()
     {
         Application.Init();
         MainMenuWindow w = new();
         w.ShowAll();
         Application.Run();
+
+        // AITesting.AItest(Opponent.MiniMaxAINoMob);
     }
+
 }
