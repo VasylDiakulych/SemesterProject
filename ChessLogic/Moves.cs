@@ -17,6 +17,10 @@ public abstract class Move
     public abstract Position FromPos { get; }
     public abstract Position ToPos { get; }
     public abstract bool Execute(Board board);
+    public bool IsCapture(Board board)
+    {
+        return !board.IsEmpty(ToPos);
+    }
     public virtual bool IsLegal(Board board)
     {
         Player player = board[FromPos].Color;

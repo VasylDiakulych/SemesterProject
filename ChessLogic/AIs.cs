@@ -1,6 +1,7 @@
 ﻿using ChessLogic;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 
 namespace ChessLogic;
 
@@ -15,6 +16,7 @@ public abstract class ChessAI{
         {
             Opponent.RandomAI => new RandomAI(game),
             Opponent.MiniMaxAI => new MiniMaxAI(game),
+            Opponent.MiniMaxAINoMob => new MiniMaxAINoMob(game),
             _ => new RandomAI(game),
         };
         ;
@@ -50,18 +52,22 @@ public class MiniMaxAI : ChessAI
 {
     public override Opponent AIType => Opponent.MiniMaxAI;
     const int whiteWin = 10000;
-    const int blackWin = 10000;
+    const int blackWin = -10000;
     const int draw = 0;
 
-    Dictionary<PieceType, int> PiecePrice = new Dictionary<PieceType, int>{
+    readonly Dictionary<PieceType, int> PiecePrice = new Dictionary<PieceType, int>{
        { PieceType.Bishop, 330 },
        { PieceType.Knight, 320 },
        { PieceType.Pawn, 100 },
        { PieceType.Queen, 900 },
        { PieceType.Rook, 500 },
        { PieceType.King, 20000 }
+
     };
 
+    readonly double MobilityPrice = 10;
+
+    private readonly Dictionary<string, (double score, int depth)> transpositionTable = [];
 
     public MiniMaxAI(GameState game)
     {
@@ -70,7 +76,7 @@ public class MiniMaxAI : ChessAI
 
     public override Move ChooseMove()
     {
-        var (_, chosenMove) = minimax(game, 4, double.NegativeInfinity, double.PositiveInfinity, true);
+        var (_, chosenMove) = Minimax(game, 5, double.NegativeInfinity, double.PositiveInfinity);
 
         return chosenMove;
     }
@@ -83,50 +89,95 @@ public class MiniMaxAI : ChessAI
         }
     }
 
-    private double MaterialEval()
+
+
+    // private double PositionEval()
+    // {
+
+    // }
+
+    private double MobilityEval(GameState state, IEnumerable<Move> whiteMoves, IEnumerable<Move> blackMoves)
     {
-        Counting counting = game.Board.CountPieces();
+
+        return MobilityPrice * (whiteMoves.Count() - blackMoves.Count());
+    }
+
+    private IEnumerable<Move> OrderMoves(GameState state, IEnumerable<Move> moves)
+    {
+        return moves.OrderByDescending(move =>
+        {
+            if (move.IsCapture(state.Board))
+            {
+                Piece capturedPiece = state.Board[move.ToPos];
+                Piece piece = state.Board[move.FromPos];
+
+                return PiecePrice[capturedPiece.Type] - PiecePrice[piece.Type] / 10;
+            }
+
+            return -1;
+        });
+    }
+
+    private double MaterialEval(GameState state)
+    {
+        Counting counting = state.Board.CountPieces();
         int whiteScore = 0;
         int blackScore = 0;
 
         foreach (PieceType piece in Enum.GetValues(typeof(PieceType)))
         {
-            whiteScore += counting.White(piece) * PiecePrice[piece];
-            blackScore += counting.Black(piece) * PiecePrice[piece];
+            int piecePrice = PiecePrice[piece];
+            whiteScore += counting.White(piece) * piecePrice;
+            blackScore += counting.Black(piece) * piecePrice;
         }
 
         return whiteScore - blackScore;
     }
 
-    private double Eval()
+    private double Eval(GameState state)
     {
-        if (game.IsGameOver())
+        if (state.IsGameOver())
         {
-            switch (game.Result.Winner)
+            return state.Result.Winner switch
             {
-                case Player.White:
-                    return whiteWin;
-                case Player.Black:
-                    return blackWin;
-                case Player.None:
-                    return draw;
-                default:
-                    return draw;
-            }
+                Player.White => whiteWin,
+                Player.Black => blackWin,
+                _ => draw
+            };
         }
 
-        return MaterialEval();
+        double totalEvaluation = 0;
+        var whiteMoves = state.AllLegalMovesFor(Player.White);
+        var blackMoves = state.AllLegalMovesFor(Player.Black);
+
+        totalEvaluation += MaterialEval(state);
+        totalEvaluation += MobilityEval(state, whiteMoves, blackMoves);
+        // totalEvalution += PositionEval();
+
+        return totalEvaluation;
     }
 
-    private (double score, Move Bestmove) minimax(GameState currentGame, int depth, double alpha, double beta, bool maximizing)
+    private (double score, Move Bestmove) Minimax(GameState currentGame, int depth, double alpha, double beta)
     {
-        if (game.IsGameOver() || depth == 0)
+        string positionString = StateString.SimpleStateString(currentGame.CurrentPlayer, currentGame.Board);
+
+        if (transpositionTable.TryGetValue(positionString, out var CachedResult) && CachedResult.depth > depth)
         {
-            return (Eval(), null);
+            return (CachedResult.score, null);
+        }
+
+        if (currentGame.IsGameOver() || depth == 0)
+        {
+            double eval = Eval(currentGame);
+            transpositionTable[positionString] = (eval, depth);
+            return (eval, null);
         }
 
         IEnumerable<Move> legalMoves = currentGame.AllLegalMovesFor(currentGame.CurrentPlayer);
+        legalMoves = OrderMoves(currentGame, legalMoves);
+
         Move best = null;
+        bool maximizing = currentGame.CurrentPlayer == Player.White;
         double bestScore = maximizing ? double.NegativeInfinity : double.PositiveInfinity;
 
         foreach (Move move in legalMoves)
@@ -134,7 +185,12 @@ public class MiniMaxAI : ChessAI
             GameState gameCopy = currentGame.Copy();
             gameCopy.MakeMove(move);
 
-            double score = minimax(gameCopy, depth - 1, alpha, beta, !maximizing).score;
+            if (gameCopy.Result == Result.Win(currentGame.CurrentPlayer))
+            {
+                return (bestScore, move);
+            }
+
+            double score = Minimax(gameCopy, depth - 1, alpha, beta).score;
 
             if (maximizing)
             {
@@ -160,6 +216,177 @@ public class MiniMaxAI : ChessAI
                 break;
             }
         }
+        transpositionTable[positionString] = (bestScore, depth);
         return (bestScore, best);
     }
 }
+
+public class MiniMaxAINoMob : ChessAI
+{
+    public override Opponent AIType => Opponent.MiniMaxAINoMob;
+    const int whiteWin = 10000;
+    const int blackWin = -10000;
+    const int draw = 0;
+
+    readonly Dictionary<PieceType, int> PiecePrice = new Dictionary<PieceType, int>{
+       { PieceType.Bishop, 330 },
+       { PieceType.Knight, 320 },
+       { PieceType.Pawn, 100 },
+       { PieceType.Queen, 900 },
+       { PieceType.Rook, 500 },
+       { PieceType.King, 20000 }
+
+    };
+
+    readonly double MobilityPrice = 10;
+
+    private readonly Dictionary<string, (double score, int depth)> transpositionTable = [];
+
+    public MiniMaxAINoMob(GameState game)
+    {
+        this.game = game;
+    }
+
+    public override Move ChooseMove()
+    {
+        var (_, chosenMove) = Minimax(game, 4, double.NegativeInfinity, double.PositiveInfinity);
+
+        return chosenMove;
+    }
+
+    public override void HandleMove()
+    {
+        if (game.CurrentPlayer == game.OpponentColor)
+        {
+            game.MakeMove(ChooseMove());
+        }
+    }
+
+    
+
+    // private double PositionEval()
+    // {
+
+    // }
+
+    private double MobilityEval(GameState state, IEnumerable<Move> whiteMoves, IEnumerable<Move> blackMoves)
+    {
+
+        return MobilityPrice * (whiteMoves.Count() - blackMoves.Count());
+    }
+
+    private IEnumerable<Move> OrderMoves(GameState state, IEnumerable<Move> moves)
+    {
+        return moves.OrderByDescending(move =>
+        {
+            if (move.IsCapture(state.Board))
+            {
+                Piece capturedPiece = state.Board[move.ToPos];
+                Piece piece = state.Board[move.FromPos];
+
+                return PiecePrice[capturedPiece.Type] - PiecePrice[piece.Type] / 10;
+            }
+
+            return -1;
+        });
+    }
+
+    private double MaterialEval(GameState state)
+    {
+        Counting counting = state.Board.CountPieces();
+        int whiteScore = 0;
+        int blackScore = 0;
+
+        foreach (PieceType piece in Enum.GetValues(typeof(PieceType)))
+        {
+            int piecePrice = PiecePrice[piece];
+            whiteScore += counting.White(piece) * piecePrice;
+            blackScore += counting.Black(piece) * piecePrice;
+        }
+
+        return whiteScore - blackScore;
+    }
+
+    private double Eval(GameState state)
+    {
+        if (state.IsGameOver())
+        {
+            return state.Result.Winner switch
+            {
+                Player.White => whiteWin,
+                Player.Black => blackWin,
+                _ => draw
+            };
+        }
+
+        double totalEvaluation = 0;
+        var whiteMoves = state.AllLegalMovesFor(Player.White);
+        var blackMoves = state.AllLegalMovesFor(Player.Black);
+
+        totalEvaluation += MaterialEval(state);
+        totalEvaluation += MobilityEval(state, whiteMoves, blackMoves);
+        // totalEvalution += PositionEval();
+
+        return totalEvaluation;
+    }
+
+    private (double score, Move Bestmove) Minimax(GameState currentGame, int depth, double alpha, double beta)
+    {
+        string positionString = StateString.SimpleStateString(currentGame.CurrentPlayer, currentGame.Board);
+
+        if (transpositionTable.TryGetValue(positionString, out var CachedResult) && CachedResult.depth >= depth)
+        {
+            return (CachedResult.score, null);
+        }
+
+        if (currentGame.IsGameOver() || depth == 0)
+        {
+            double eval = Eval(currentGame);
+            transpositionTable[positionString] = (eval, depth);
+            return (eval, null);
+        }
+
+        IEnumerable<Move> legalMoves = currentGame.AllLegalMovesFor(currentGame.CurrentPlayer);
+        legalMoves = OrderMoves(currentGame, legalMoves);
+
+        Move best = null;
+        bool maximizing = currentGame.CurrentPlayer == Player.White;
+        double bestScore = maximizing ? double.NegativeInfinity : double.PositiveInfinity;
+        
+        foreach (Move move in legalMoves)
+        {
+            GameState gameCopy = currentGame.Copy();
+            gameCopy.MakeMove(move);
+
+            double score = Minimax(gameCopy, depth - 1, alpha, beta).score;
+
+            if (maximizing)
+            {
+                if (score > bestScore)
+                {
+                    bestScore = score;
+                    best = move;
+                }
+                alpha = Math.Max(alpha, bestScore);
+            }
+            else
+            {
+                if (score < bestScore)
+                {
+                    bestScore = score;
+                    best = move;
+                }
+                beta = Math.Min(beta, bestScore);
+            }
+
+            if (beta <= alpha)
+            {
+                break;
+            }
+        }
+
+        transpositionTable[positionString] = (bestScore, depth);
+        return (bestScore, best);
+    }
+}
+

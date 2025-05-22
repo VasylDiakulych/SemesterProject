@@ -1,8 +1,10 @@
 namespace ChessLogic;
 
-public enum Opponent{
+public enum Opponent
+{
     HumanPlayer,
     RandomAI,
-    MiniMaxAI
+    MiniMaxAI,
+    MiniMaxAINoMob
 };
 

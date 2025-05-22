@@ -103,11 +103,11 @@ public class GameState
 
     public GameState Copy()
     {
-        GameState copy = new GameState(this.CurrentPlayer, Board.Copy(), this.Opponent, this.CurrentPlayer)
+        GameState copy = new GameState(CurrentPlayer, Board.Copy(), Opponent, CurrentPlayer)
         {
-            FiftyMoveCounter = this.FiftyMoveCounter,
-            stateHistory = this.stateHistory,
-            stateString = this.stateString
+            FiftyMoveCounter = FiftyMoveCounter,
+            stateHistory = new Dictionary<string, int>(this.stateHistory),
+            stateString = new string(stateString)
         };
 
         return copy;

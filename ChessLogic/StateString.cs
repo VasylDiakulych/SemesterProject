@@ -6,13 +6,22 @@ public class StateString{
     private readonly StringBuilder sb = new StringBuilder();
 
     public StateString(Player player, Board board){
-        AddPiecePlacement(board);
+        AddPiecePlacement(board, sb);
         sb.Append(' ');
-        AddCurrentPlayer(player);
+        AddCurrentPlayer(player, sb);
         sb.Append(' ');
-        AddCastlingRights(board);
+        AddCastlingRights(board, sb);
         sb.Append(' ');
-        AddEnPassant(board, player);
+        AddEnPassant(board, player, sb);
+    }
+
+    public static string SimpleStateString(Player player, Board board)
+    {
+        StringBuilder ssb = new();
+        AddPiecePlacement(board, ssb);
+        ssb.Append(' ');
+        AddCurrentPlayer(player, ssb);
+        return ssb.ToString();
     }
 
     public override string ToString()
@@ -38,7 +47,7 @@ public class StateString{
         return c;
     }
 
-    private void AddRowData(Board board, int row){
+    private static void AddRowData(Board board, int row, StringBuilder sb){
         int empty = 0;
         for(int i = 0; i < Board.BoardSize; i++){
             if(board[row, i] == null){
@@ -59,16 +68,16 @@ public class StateString{
         }
     }
 
-    private void AddPiecePlacement(Board board){
+    private static void AddPiecePlacement(Board board, StringBuilder sb){
         for(int i = 0; i<Board.BoardSize; i++){
             if( i != 0){
                 sb.Append('/');
             }
-            AddRowData(board, i);
+            AddRowData(board, i, sb);
         }
     }
 
-    private void AddCurrentPlayer(Player currentPlayer){
+    private static void AddCurrentPlayer(Player currentPlayer, StringBuilder sb){
         if(currentPlayer == Player.White){
             sb.Append('w');
         }
@@ -77,7 +86,7 @@ public class StateString{
         }
     }
 
-    private void AddCastlingRights(Board board){
+    private void AddCastlingRights(Board board, StringBuilder sb){
 
         bool castleWKS = board.CastleRightKS(Player.White);
         bool castleBKS = board.CastleRightKS(Player.Black);
@@ -107,7 +116,7 @@ public class StateString{
 
     }
 
-    private void AddEnPassant(Board board, Player player){
+    private void AddEnPassant(Board board, Player player, StringBuilder bs){
         if(!board.CanCaptureEnPassant(player)){
             sb.Append('-');
             return;
