@@ -5,6 +5,13 @@ public enum Opponent
     HumanPlayer,
     RandomAI,
     MiniMaxAI,
-    MiniMaxAINoMob
+    MiniMaxAIBetter,
+    MiniMaxAIPos
 };
 
+public enum GameStage
+{
+    Opening,
+    Middlegame,
+    Endgame
+};

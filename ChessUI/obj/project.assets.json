@@ -205,6 +205,7 @@
   },
   "projectFileDependencyGroups": {
     "net9.0": [
+      "CairoSharp >= 3.24.24.95",
       "ChessLogic >= 1.0.0",
       "GtkSharp >= 3.24.24.95"
     ]
@@ -256,6 +257,10 @@
       "net9.0": {
         "targetAlias": "net9.0",
         "dependencies": {
+          "CairoSharp": {
+            "target": "Package",
+            "version": "[3.24.24.95, )"
+          },
           "ChessLogic": {
             "target": "Package",
             "version": "[1.0.0, )"

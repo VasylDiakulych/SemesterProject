@@ -4,6 +4,7 @@ using Gtk;
 using Cairo;
 using ChessLogic;
 
+
 public class MainMenuWindow : Gtk.Window {
     public MainMenuWindow() : base("Chess")
     {
@@ -145,6 +146,8 @@ public class ChessSetupDialog : Gtk.Window{
             "HumanPlayer" => Opponent.HumanPlayer,
             "RandomAI" => Opponent.RandomAI,
             "MiniMaxAI" => Opponent.MiniMaxAI,
+            "MiniMaxAIBetter" => Opponent.MiniMaxAIBetter,
+            "MiniMaxAIPos" => Opponent.MiniMaxAIPos,
             _ => Opponent.HumanPlayer,
         };
 
@@ -220,6 +223,8 @@ class MainWindow : Gtk.Window {
 
         drawingArea = new DrawingArea();
         Add(drawingArea);
+
+        // GLib.Timeout.Add(16, );
 
         string path = System.IO.Path.Combine("Assets", "Board.png");
         backgroundImage = new Pixbuf(path);
@@ -316,7 +321,12 @@ class MainWindow : Gtk.Window {
 
             if (game.Result == null && game.Opponent != Opponent.HumanPlayer)
             {
-                AIHandleMove();
+                GLib.Idle.Add(() =>
+                {
+                    AIHandleMove();
+                    QueueDraw();
+                    return false;
+                });
             }
 
         }
@@ -486,12 +496,12 @@ class Chess
 {
     static void Main()
     {
-        Application.Init();
-        MainMenuWindow w = new();
-        w.ShowAll();
-        Application.Run();
+        // Application.Init();
+        // MainMenuWindow w = new();
+        // w.ShowAll();
+        // Application.Run();
 
-        // AITesting.AItest(Opponent.MiniMaxAINoMob);
+        AITesting.AItest(Opponent.MiniMaxAIPos);
     }
 
 }

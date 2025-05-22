@@ -130,3 +130,33 @@ public class StateString{
 
     }
 }
+
+public static class Zobrist
+{
+    public static readonly ulong[,,] PieceHash = new ulong[2, 6, 64]; // [color, pieceType, square]
+    public static readonly ulong BlackToMove;
+
+    static Zobrist()
+    {
+        Random rng = new Random(42); 
+        for (int color = 0; color < 2; color++)
+        {
+            for (int piece = 0; piece < 6; piece++)
+            {
+                for (int square = 0; square < 64; square++)
+                {
+                    PieceHash[color, piece, square] = RandomULong(rng);
+                }
+            }
+        }
+
+        BlackToMove = RandomULong(rng);
+    }
+
+    private static ulong RandomULong(Random rng)
+    {
+        var buffer = new byte[8];
+        rng.NextBytes(buffer);
+        return BitConverter.ToUInt64(buffer, 0);
+    }
+}
