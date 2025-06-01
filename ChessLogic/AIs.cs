@@ -16,8 +16,8 @@ public abstract class ChessAI{
         {
             Opponent.RandomAI => new RandomAI(game),
             Opponent.MiniMaxAI => new MiniMaxAI(game),
-            Opponent.MiniMaxAIBetter => new MiniMaxAIBetter(game),
-            Opponent.MiniMaxAIPos => new MiniMaxAIPos(game),
+            Opponent.MiniMaxAIOld1 => new MiniMaxAIOld1(game),
+            Opponent.MiniMaxAIOld2 => new MiniMaxAIOld2(game),
             _ => new RandomAI(game),
         };
         ;
@@ -49,9 +49,9 @@ public class RandomAI : ChessAI
     }
 }
 
-public class MiniMaxAI : ChessAI
+public class MiniMaxAIOld1 : ChessAI
 {
-    public override Opponent AIType => Opponent.MiniMaxAI;
+    public override Opponent AIType => Opponent.MiniMaxAIOld2;
     const int whiteWin = 10000;
     const int blackWin = -10000;
     const int draw = 0;
@@ -70,7 +70,7 @@ public class MiniMaxAI : ChessAI
 
     private readonly Dictionary<string, (double score, int depth)> transpositionTable = [];
 
-    public MiniMaxAI(GameState game)
+    public MiniMaxAIOld1(GameState game)
     {
         this.game = game;
     }
@@ -89,13 +89,6 @@ public class MiniMaxAI : ChessAI
             game.MakeMove(ChooseMove());
         }
     }
-
-
-
-    // private double PositionEval()
-    // {
-
-    // }
 
     private double MobilityEval(GameState state, IEnumerable<Move> whiteMoves, IEnumerable<Move> blackMoves)
     {
@@ -152,9 +145,6 @@ public class MiniMaxAI : ChessAI
         var blackMoves = state.AllLegalMovesFor(Player.Black);
 
         totalEvaluation += MaterialEval(state);
-        // totalEvaluation += MobilityEval(state, whiteMoves, blackMoves);
-        // totalEvalution += PositionEval();
-
         return totalEvaluation;
     }
 
@@ -222,9 +212,9 @@ public class MiniMaxAI : ChessAI
     }
 }
 
-public class MiniMaxAIBetter : ChessAI
+public class MiniMaxAIOld2 : ChessAI
 {
-    public override Opponent AIType => Opponent.MiniMaxAIBetter;
+    public override Opponent AIType => Opponent.MiniMaxAIOld1;
     const int whiteWin = 10000;
     const int blackWin = -10000;
     const int draw = 0;
@@ -243,7 +233,7 @@ public class MiniMaxAIBetter : ChessAI
 
     private readonly Dictionary<string, (double score, int depth)> transpositionTable = [];
 
-    public MiniMaxAIBetter(GameState game)
+    public MiniMaxAIOld2(GameState game)
     {
         this.game = game;
     }
@@ -391,11 +381,11 @@ public class MiniMaxAIBetter : ChessAI
     }
 }
 
-public class MiniMaxAIPos : ChessAI
+public class MiniMaxAI: ChessAI
 {
 
 
-    public override Opponent AIType => Opponent.MiniMaxAIPos;
+    public override Opponent AIType => Opponent.MiniMaxAI;
     const int whiteWin = 10000;
     const int blackWin = -10000;
     const int draw = 0;
@@ -416,7 +406,7 @@ public class MiniMaxAIPos : ChessAI
 
     private readonly Dictionary<ulong, (double score, int depth)> transpositionTable = [];
 
-    public MiniMaxAIPos(GameState game)
+    public MiniMaxAI(GameState game)
     {
         this.game = game;
         
@@ -424,8 +414,8 @@ public class MiniMaxAIPos : ChessAI
 
     public override Move ChooseMove()
     {
-        var (_, chosenMove) = Minimax(game, 5, double.NegativeInfinity, double.PositiveInfinity);
-
+        var (score, chosenMove) = Minimax(game, 4, double.NegativeInfinity, double.PositiveInfinity);
+        Console.WriteLine("The heuristic evaluation of this move is: " + score);
         return chosenMove;
     }
 
@@ -523,7 +513,7 @@ public class MiniMaxAIPos : ChessAI
         return whiteScore - blackScore;
     }
 
-    private double Eval(GameState state)
+    private double Eval(GameState state, IEnumerable<Move> whiteMoves, IEnumerable<Move> blackMoves)
     {
         if (state.IsGameOver())
         {
@@ -536,8 +526,6 @@ public class MiniMaxAIPos : ChessAI
         }
 
         double totalEvaluation = 0;
-        var whiteMoves = state.AllLegalMovesFor(Player.White);
-        var blackMoves = state.AllLegalMovesFor(Player.Black);
 
         stage = GetStage(state);
 
@@ -556,15 +544,18 @@ public class MiniMaxAIPos : ChessAI
         {
             return (CachedResult.score, null);
         }
+        
+        var whiteMoves = currentGame.AllLegalMovesFor(Player.White);
+        var blackMoves = currentGame.AllLegalMovesFor(Player.Black);
 
         if (currentGame.IsGameOver() || depth == 0)
         {
-            double eval = Eval(currentGame);
+            double eval = Eval(currentGame, whiteMoves, blackMoves);
             transpositionTable[hash] = (eval, depth);
             return (eval, null);
         }
 
-        IEnumerable<Move> legalMoves = currentGame.AllLegalMovesFor(currentGame.CurrentPlayer);
+        IEnumerable<Move> legalMoves = currentGame.CurrentPlayer == Player.White? whiteMoves : blackMoves;
         legalMoves = OrderMoves(currentGame, legalMoves);
 
         Move best = null;

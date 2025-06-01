@@ -146,8 +146,8 @@ public class ChessSetupDialog : Gtk.Window{
             "HumanPlayer" => Opponent.HumanPlayer,
             "RandomAI" => Opponent.RandomAI,
             "MiniMaxAI" => Opponent.MiniMaxAI,
-            "MiniMaxAIBetter" => Opponent.MiniMaxAIBetter,
-            "MiniMaxAIPos" => Opponent.MiniMaxAIPos,
+            "MiniMaxAIOld1" => Opponent.MiniMaxAIOld1,
+            "MiniMaxAIOld2" => Opponent.MiniMaxAIOld2,
             _ => Opponent.HumanPlayer,
         };
 
@@ -223,8 +223,6 @@ class MainWindow : Gtk.Window {
 
         drawingArea = new DrawingArea();
         Add(drawingArea);
-
-        // GLib.Timeout.Add(16, );
 
         string path = System.IO.Path.Combine("Assets", "Board.png");
         backgroundImage = new Pixbuf(path);
@@ -496,12 +494,12 @@ class Chess
 {
     static void Main()
     {
-        // Application.Init();
-        // MainMenuWindow w = new();
-        // w.ShowAll();
-        // Application.Run();
+        Application.Init();
+        MainMenuWindow w = new();
+        w.ShowAll();
+        Application.Run();
 
-        AITesting.AItest(Opponent.MiniMaxAIPos);
+        // AITesting.AItest(Opponent.MiniMaxAIPos);
     }
 
 }
