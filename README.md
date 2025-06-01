@@ -23,14 +23,17 @@ The format of this file will be provided later, also there are few custom positi
 - "Quit" button will close the application
 
 Technical notes:
+
 UI:
 - UI completely made using GTKSharp and Cairo. after each move, application redraws the board
 - Assests used are free for use, found on internet 
 - You can find source code at SemesterProject/ChessUI/Program.cs
+
 Game itself:
 - Logic of the game completely separate of UI
 - Source code is located at SemesterProject/ChessLogic/
 - Game logic widely uses object-oriented approach, also it implements decomposition into different classes and even files
+
 AI:
 - Chess bot uses minimax algorithm with alpha-beta pruning
 - It implements different ompitizations like transposition tables and move prioritizing
