@@ -7,7 +7,7 @@ C# Chess Game implementation, with possibility of playing against AI player
 Getting started:
 1. Download project
 2. Open terminal in folder with project
-3. Run ```cd ChessUI | dotnet run```
+3. Run ```dotnet run --project ChessUI/ChessUI.csproj```
 4. Enjoy the project
 
 How to use an application:
