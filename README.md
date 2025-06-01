@@ -12,6 +12,7 @@ Getting started:
 
 How to use an application:
 After start you'll see main menu:
+
 ![image](https://github.com/user-attachments/assets/53ea99ad-d873-4237-9928-2d3f4db34af9)
 
 - "New Game" button will start game option window, where you can choose opponent(Human player or various chess bots)
