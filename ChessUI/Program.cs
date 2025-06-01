@@ -212,7 +212,7 @@ class MainWindow : Gtk.Window {
     private readonly Dictionary<Position, Move> CachedMoves = new();
     private readonly Board board = new();
 
-    public MainWindow(Opponent opponent = Opponent.HumanPlayer, Player player = Player.White, string startingPositionPath = "ChessLogic\\standardPosition.txt") : base("Chess")
+    public MainWindow(Opponent opponent = Opponent.HumanPlayer, Player player = Player.White, string startingPositionPath = "ChessLogic/standardPosition.txt") : base("Chess")
     {
         SetDefaultSize(594, 594);
         SetPosition(WindowPosition.Center);

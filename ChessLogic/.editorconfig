@@ -5,3 +5,9 @@ dotnet_diagnostic.CS0612.severity = none
 
 # CS8600: Converting null literal or possible null value to non-nullable type.
 dotnet_diagnostic.CS8600.severity = none
+
+# CS8622: Nullability of reference types in type of parameter doesn't match the target delegate (possibly because of nullability attributes).
+dotnet_diagnostic.CS8619.severity = none
+
+dotnet_diagnostic.CS8603.severity = none
+

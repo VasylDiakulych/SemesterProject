@@ -20,7 +20,6 @@ public abstract class ChessAI{
             Opponent.MiniMaxAIOld2 => new MiniMaxAIOld2(game),
             _ => new RandomAI(game),
         };
-        ;
     }
 }
 
@@ -253,13 +252,6 @@ public class MiniMaxAIOld2 : ChessAI
         }
     }
 
-    
-
-    // private double PositionEval()
-    // {
-
-    // }
-
     private double MobilityEval(GameState state, IEnumerable<Move> whiteMoves, IEnumerable<Move> blackMoves)
     {
 
@@ -316,7 +308,6 @@ public class MiniMaxAIOld2 : ChessAI
 
         totalEvaluation += MaterialEval(state);
         totalEvaluation += MobilityEval(state, whiteMoves, blackMoves);
-        // totalEvalution += PositionEval();
 
         return totalEvaluation;
     }
