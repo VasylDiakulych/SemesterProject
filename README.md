@@ -39,3 +39,19 @@ AI:
 - It implements different ompitizations like transposition tables and move prioritizing
 - For total evaluation, it uses sum of material evaluation, mobility evaluation(number of your moves - number of opponent moves) and position evaluation
 - Position evaluation uses information about current game stage(Oppening, Middlegame, Endgame) and piece position tables, where each piece has prefered squares 
+
+
+Format of the starting positon file:
+- File should be .txt
+- White pieces should be an uppercase letter which corresponds to a piece
+- Black pieces should be lowercase
+- Empty tiles should be marked as dot ('.')
+- Example:
+  rnbqkbnr
+  pppppppp
+  ........
+  ........
+  ........
+  ........      
+  PPPPPPPP
+  RNBQKBNR
