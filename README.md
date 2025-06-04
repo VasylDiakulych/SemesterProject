@@ -46,12 +46,7 @@ Format of the starting positon file:
 - White pieces should be an uppercase letter which corresponds to a piece
 - Black pieces should be lowercase
 - Empty tiles should be marked as dot ('.')
+- End of the row should be marked with new line character
 - Example:
-  rnbqkbnr
-  pppppppp
-  ........
-  ........
-  ........
-  ........      
-  PPPPPPPP
-  RNBQKBNR
+ ![image](https://github.com/user-attachments/assets/7414be34-21fb-482b-be29-d56f95efc8aa)
+
