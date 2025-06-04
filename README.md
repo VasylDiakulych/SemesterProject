@@ -47,6 +47,7 @@ Format of the starting positon file:
 - Black pieces should be lowercase
 - Empty tiles should be marked as dot ('.')
 - End of the row should be marked with new line character
+- Remember, that game is a white-side POW, so put black pawns on top part of the board and white pawns at the bottom
 - Example:
   
  ![image](https://github.com/user-attachments/assets/7414be34-21fb-482b-be29-d56f95efc8aa)
