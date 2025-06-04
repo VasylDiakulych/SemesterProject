@@ -48,5 +48,6 @@ Format of the starting positon file:
 - Empty tiles should be marked as dot ('.')
 - End of the row should be marked with new line character
 - Example:
+  
  ![image](https://github.com/user-attachments/assets/7414be34-21fb-482b-be29-d56f95efc8aa)
 
