@@ -5,13 +5,17 @@ using System.Numerics;
 
 namespace ChessLogic;
 
-public abstract class ChessAI{
-    public abstract Opponent AIType  { get; } 
+
+// General class for chess bots 
+public abstract class ChessAI
+{
+    public abstract Opponent AIType { get; }
     protected GameState game;
     public abstract Move ChooseMove();
     public abstract void HandleMove();
-    
-    public static ChessAI ReturnAI(Opponent aiType, GameState game) {
+
+    public static ChessAI ReturnAI(Opponent aiType, GameState game)
+    {
         return aiType switch
         {
             Opponent.RandomAI => new RandomAI(game),
@@ -24,15 +28,18 @@ public abstract class ChessAI{
     }
 }
 
+// Most basic chess bot, which returns random move from all legal moves
 public class RandomAI : ChessAI
 {
     public override Opponent AIType => Opponent.RandomAI;
 
-    public RandomAI(GameState game){
+    public RandomAI(GameState game)
+    {
         this.game = game;
     }
 
-    public override Move ChooseMove(){
+    public override Move ChooseMove()
+    {
         IEnumerable<Move> moves = game.AllLegalMovesFor(game.CurrentPlayer);
         List<Move> movesList = moves.ToList();
 
@@ -43,12 +50,15 @@ public class RandomAI : ChessAI
 
     public override void HandleMove()
     {
-        if(game.Result == null && game.CurrentPlayer == game.OpponentColor){
+        if (game.Result == null && game.CurrentPlayer == game.OpponentColor)
+        {
             game.MakeMove(ChooseMove());
         }
     }
 }
 
+// First version of chess bot which uses miniMax algorithm with alpha-beta pruning to choose move
+// Evaluation of the position is basically total material difference between players
 public class MiniMaxAIOld1 : ChessAI
 {
     public override Opponent AIType => Opponent.MiniMaxAIOld2;
@@ -65,10 +75,6 @@ public class MiniMaxAIOld1 : ChessAI
        { PieceType.King, 20000 }
 
     };
-
-    readonly double MobilityPrice = 10;
-
-    private readonly Dictionary<string, (double score, int depth)> transpositionTable = [];
 
     public MiniMaxAIOld1(GameState game)
     {
@@ -90,12 +96,7 @@ public class MiniMaxAIOld1 : ChessAI
         }
     }
 
-    private double MobilityEval(GameState state, IEnumerable<Move> whiteMoves, IEnumerable<Move> blackMoves)
-    {
-
-        return MobilityPrice * (whiteMoves.Count() - blackMoves.Count());
-    }
-
+    // Function which puts capture moves first, to optimize minimax
     private IEnumerable<Move> OrderMoves(GameState state, IEnumerable<Move> moves)
     {
         return moves.OrderByDescending(move =>
@@ -141,8 +142,6 @@ public class MiniMaxAIOld1 : ChessAI
         }
 
         double totalEvaluation = 0;
-        var whiteMoves = state.AllLegalMovesFor(Player.White);
-        var blackMoves = state.AllLegalMovesFor(Player.Black);
 
         totalEvaluation += MaterialEval(state);
         return totalEvaluation;
@@ -152,15 +151,9 @@ public class MiniMaxAIOld1 : ChessAI
     {
         string positionString = StateString.SimpleStateString(currentGame.CurrentPlayer, currentGame.Board);
 
-        if (transpositionTable.TryGetValue(positionString, out var CachedResult) && CachedResult.depth > depth)
-        {
-            return (CachedResult.score, null);
-        }
-
         if (currentGame.IsGameOver() || depth == 0)
         {
             double eval = Eval(currentGame);
-            transpositionTable[positionString] = (eval, depth);
             return (eval, null);
         }
 
@@ -207,11 +200,13 @@ public class MiniMaxAIOld1 : ChessAI
                 break;
             }
         }
-        transpositionTable[positionString] = (bestScore, depth);
         return (bestScore, best);
     }
 }
 
+// Second version of chess bot with minimax
+// Evaluation of the position is based on material difference and number of possible moves for each player
+// Also it implements an optimization technique, by keeping track of positions visited in minimax
 public class MiniMaxAIOld2 : ChessAI
 {
     public override Opponent AIType => Opponent.MiniMaxAIOld1;
@@ -252,13 +247,6 @@ public class MiniMaxAIOld2 : ChessAI
             game.MakeMove(ChooseMove());
         }
     }
-
-    
-
-    // private double PositionEval()
-    // {
-
-    // }
 
     private double MobilityEval(GameState state, IEnumerable<Move> whiteMoves, IEnumerable<Move> blackMoves)
     {
@@ -316,15 +304,16 @@ public class MiniMaxAIOld2 : ChessAI
 
         totalEvaluation += MaterialEval(state);
         totalEvaluation += MobilityEval(state, whiteMoves, blackMoves);
-        // totalEvalution += PositionEval();
 
         return totalEvaluation;
     }
 
     private (double score, Move Bestmove) Minimax(GameState currentGame, int depth, double alpha, double beta)
     {
+        // created simplified version of the state string to use in transposition table
         string positionString = StateString.SimpleStateString(currentGame.CurrentPlayer, currentGame.Board);
 
+        // if position already evaluated on higher depth, we just take cached result
         if (transpositionTable.TryGetValue(positionString, out var CachedResult) && CachedResult.depth >= depth)
         {
             return (CachedResult.score, null);
@@ -343,7 +332,7 @@ public class MiniMaxAIOld2 : ChessAI
         Move best = null;
         bool maximizing = currentGame.CurrentPlayer == Player.White;
         double bestScore = maximizing ? double.NegativeInfinity : double.PositiveInfinity;
-        
+
         foreach (Move move in legalMoves)
         {
             GameState gameCopy = currentGame.Copy();
@@ -381,7 +370,11 @@ public class MiniMaxAIOld2 : ChessAI
     }
 }
 
-public class MiniMaxAI: ChessAI
+// Third version of chess bot with minimax
+// Evaluation implements previous techniques + position evaluation based on precalculated
+// optimal squares for each piece(piece position tables) + current phase of the game(to be improved in newer versions)
+// + aditional optimization, with using Zobrist hashing instead of simplified statestring for transposition table
+public class MiniMaxAI : ChessAI
 {
 
 
@@ -409,13 +402,15 @@ public class MiniMaxAI: ChessAI
     public MiniMaxAI(GameState game)
     {
         this.game = game;
-        
     }
 
     public override Move ChooseMove()
     {
         var (score, chosenMove) = Minimax(game, 4, double.NegativeInfinity, double.PositiveInfinity);
+
+        // debugging line
         Console.WriteLine("The heuristic evaluation of this move is: " + score);
+
         return chosenMove;
     }
 
@@ -457,19 +452,38 @@ public class MiniMaxAI: ChessAI
             int index = pos.Row * 8 + pos.Column;
             bool isWhite = piece.Color == Player.White;
 
-            eval += piece.Type switch
+            if (isWhite)
             {
-                PieceType.Pawn => PieceTables.PawnTable[isWhite ? index : 63 - index],
-                PieceType.Bishop => PieceTables.BishopTable[isWhite ? index : 63 - index],
-                PieceType.Knight => PieceTables.KnightTable[isWhite ? index : 63 - index],
-                PieceType.Rook => PieceTables.RookTable[isWhite ? index : 63 - index],
-                PieceType.Queen => PieceTables.QueenTable[isWhite ? index : 63 - index],
-                PieceType.King =>
-                    stage != GameStage.Endgame ?
-                    PieceTables.KingOpeningTable[isWhite ? index : 63 - index] :
-                    PieceTables.KingEndgameTable[isWhite ? index : 63 - index],
-                _ => 0
-            };
+                eval += piece.Type switch
+                {
+                    PieceType.Pawn => PieceTables.PawnTable[index],
+                    PieceType.Bishop => PieceTables.BishopTable[index],
+                    PieceType.Knight => PieceTables.KnightTable[index],
+                    PieceType.Rook => PieceTables.RookTable[index],
+                    PieceType.Queen => PieceTables.QueenTable[index],
+                    PieceType.King =>
+                        stage != GameStage.Endgame ?
+                        PieceTables.KingOpeningTable[index] :
+                        PieceTables.KingEndgameTable[index],
+                    _ => 0
+                };
+            }
+            else
+            {
+                eval -= piece.Type switch
+                {
+                    PieceType.Pawn => PieceTables.PawnTable[63 - index],
+                    PieceType.Bishop => PieceTables.BishopTable[63 - index],
+                    PieceType.Knight => PieceTables.KnightTable[63 - index],
+                    PieceType.Rook => PieceTables.RookTable[63 - index],
+                    PieceType.Queen => PieceTables.QueenTable[63 - index],
+                    PieceType.King =>
+                        stage != GameStage.Endgame ?
+                        PieceTables.KingOpeningTable[63 - index] :
+                        PieceTables.KingEndgameTable[63 - index],
+                    _ => 0
+                };
+            }
         }
 
         return eval;
@@ -544,7 +558,7 @@ public class MiniMaxAI: ChessAI
         {
             return (CachedResult.score, null);
         }
-        
+
         var whiteMoves = currentGame.AllLegalMovesFor(Player.White);
         var blackMoves = currentGame.AllLegalMovesFor(Player.Black);
 
@@ -555,13 +569,13 @@ public class MiniMaxAI: ChessAI
             return (eval, null);
         }
 
-        IEnumerable<Move> legalMoves = currentGame.CurrentPlayer == Player.White? whiteMoves : blackMoves;
+        IEnumerable<Move> legalMoves = currentGame.CurrentPlayer == Player.White ? whiteMoves : blackMoves;
         legalMoves = OrderMoves(currentGame, legalMoves);
 
         Move best = null;
         bool maximizing = currentGame.CurrentPlayer == Player.White;
         double bestScore = maximizing ? double.NegativeInfinity : double.PositiveInfinity;
-        
+
         foreach (Move move in legalMoves)
         {
             GameState gameCopy = currentGame.Copy();

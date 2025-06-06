@@ -1,6 +1,8 @@
 
 namespace ChessLogic;
 
+// general position class which stores row and column of the tile
+// basically a coordinate class which implements an adittion with vector class(direction)
 public class Position
 {
     public int Row { get; }
@@ -24,8 +26,8 @@ public class Position
     public override bool Equals(object? obj)
     {
         return obj is Position position &&
-                Row == position.Row &&
-                Column == position.Column;
+            Row == position.Row &&
+            Column == position.Column;
     }
 
     public override int GetHashCode()
@@ -47,14 +49,15 @@ public class Position
     {
         return new Position(pos.Row + dir.RowDelta, pos.Column + dir.ColumnDelta);
     }
-    
+
+    // create algebraic name of the tile
+    // used for debugging
     public string ToAlgebraic()
     {
-        char file = (char)('a' + Column); 
-        int rank = 8 - Row; 
+        char file = (char)('a' + Column);
+        int rank = 8 - Row;
 
         return $"{file}{rank}";
     }
-
 
 }

@@ -499,7 +499,7 @@ class Chess
         w.ShowAll();
         Application.Run();
 
-        // AITesting.AItest(Opponent.MiniMaxAIPos);
+        // AITesting.AItest(Opponent.MiniMaxAI);
     }
 
 }
