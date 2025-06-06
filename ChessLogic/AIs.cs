@@ -24,7 +24,6 @@ public abstract class ChessAI
             Opponent.MiniMaxAIOld2 => new MiniMaxAIOld2(game),
             _ => new RandomAI(game),
         };
-        ;
     }
 }
 

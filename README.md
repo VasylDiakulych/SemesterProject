@@ -7,7 +7,7 @@ C# Chess Game implementation, with possibility of playing against AI player
 Getting started:
 1. Download project
 2. Open terminal in folder with project
-3. Run ```cd ChessUI | dotnet run```
+3. Run ```dotnet run --project ChessUI/ChessUI.csproj```
 4. Enjoy the project
 
 How to use an application:
@@ -39,3 +39,16 @@ AI:
 - It implements different ompitizations like transposition tables and move prioritizing
 - For total evaluation, it uses sum of material evaluation, mobility evaluation(number of your moves - number of opponent moves) and position evaluation
 - Position evaluation uses information about current game stage(Oppening, Middlegame, Endgame) and piece position tables, where each piece has prefered squares 
+
+
+Format of the starting positon file:
+- File should be .txt
+- White pieces should be an uppercase letter which corresponds to a piece
+- Black pieces should be lowercase
+- Empty tiles should be marked as dot ('.')
+- End of the row should be marked with new line character
+- Remember, that game is a white-side POW, so put black pawns on top part of the board and white pawns at the bottom
+- Example:
+  
+ ![image](https://github.com/user-attachments/assets/7414be34-21fb-482b-be29-d56f95efc8aa)
+
