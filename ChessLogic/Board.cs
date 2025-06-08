@@ -416,6 +416,26 @@ public class Board
             hash ^= Zobrist.BlackToMove;
         }
 
+        if (CastleRightKS(Player.White)) hash ^= Zobrist.CastlingRights[0];
+        if (CastleRightQS(Player.White)) hash ^= Zobrist.CastlingRights[1];
+        if (CastleRightKS(Player.Black)) hash ^= Zobrist.CastlingRights[2];
+        if (CastleRightQS(Player.Black)) hash ^= Zobrist.CastlingRights[3];
+
+        Position epTarget = null;
+        if (EnPassantSquares[Player.White] != null)
+        {
+            epTarget = EnPassantSquares[Player.White];
+        }
+        else if(EnPassantSquares[Player.Black] != null)
+        {
+            epTarget = EnPassantSquares[Player.Black];
+        }
+
+        if (epTarget != null)
+        {
+            hash ^= Zobrist.EnPassantFile[epTarget.Column];
+        }
+
         return hash;
     }
 

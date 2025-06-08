@@ -382,6 +382,7 @@ public class MiniMaxAI : ChessAI
     const int blackWin = -10000;
     const int draw = 0;
     int TotalPhase = 4000;
+    int startingDepth = 4;
     GameStage stage;
 
     readonly Dictionary<PieceType, int> PiecePrice = new Dictionary<PieceType, int>{
@@ -405,7 +406,7 @@ public class MiniMaxAI : ChessAI
 
     public override Move ChooseMove()
     {
-        var (score, chosenMove) = Minimax(game, 4, double.NegativeInfinity, double.PositiveInfinity);
+        var (score, chosenMove) = Minimax(game, startingDepth, double.NegativeInfinity, double.PositiveInfinity);
 
         // debugging line
         Console.WriteLine("The heuristic evaluation of this move is: " + score);
@@ -497,8 +498,14 @@ public class MiniMaxAI : ChessAI
     private IEnumerable<Move> OrderMoves(GameState state, IEnumerable<Move> moves)
     {
         return moves.OrderByDescending(move =>
-        {
-            if (move.IsCapture(state.Board))
+        {   
+            // prioritize castling moves
+            if (move.Type == MoveType.CastleKS || move.Type == MoveType.CastleQS)
+            {
+                return 1000;
+            }
+            // then captures
+            else if (move.IsCapture(state.Board))
             {
                 Piece capturedPiece = state.Board[move.ToPos];
                 Piece piece = state.Board[move.FromPos];
@@ -530,12 +537,18 @@ public class MiniMaxAI : ChessAI
     {
         if (state.IsGameOver())
         {
-            return state.Result.Winner switch
+            if (state.Result.Reason == EndReason.Checkmate)
             {
-                Player.White => whiteWin,
-                Player.Black => blackWin,
-                _ => draw
-            };
+                return state.Result.Winner switch
+                {
+                    Player.White => whiteWin,
+                    _ => blackWin
+                };
+            }
+            else
+            {
+                return 0;
+            }
         }
 
         double totalEvaluation = 0;
@@ -553,7 +566,7 @@ public class MiniMaxAI : ChessAI
     {
         ulong hash = currentGame.Board.ComputeZobristHash(currentGame.CurrentPlayer);
 
-        if (transpositionTable.TryGetValue(hash, out var CachedResult) && CachedResult.depth >= depth)
+        if (transpositionTable.TryGetValue(hash, out var CachedResult) && CachedResult.depth >= depth && depth != startingDepth)
         {
             return (CachedResult.score, null);
         }

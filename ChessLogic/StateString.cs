@@ -135,10 +135,12 @@ public static class Zobrist
 {
     public static readonly ulong[,,] PieceHash = new ulong[2, 6, 64]; // [color, pieceType, square]
     public static readonly ulong BlackToMove;
+    public static readonly ulong[] CastlingRights = new ulong[4]; 
+    public static readonly ulong[] EnPassantFile = new ulong[8];
 
     static Zobrist()
     {
-        Random rng = new Random(42); 
+        Random rng = new Random(42);
         for (int color = 0; color < 2; color++)
         {
             for (int piece = 0; piece < 6; piece++)
@@ -151,6 +153,16 @@ public static class Zobrist
         }
 
         BlackToMove = RandomULong(rng);
+
+        for (int i = 0; i < 4; i++)
+        {
+            CastlingRights[i] = RandomULong(rng);
+        }
+        
+        for (int i = 0; i < 8; i++)
+        {
+            EnPassantFile[i] = RandomULong(rng);
+        }
     }
 
     private static ulong RandomULong(Random rng)

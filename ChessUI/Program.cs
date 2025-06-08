@@ -106,7 +106,7 @@ public class ChessSetupDialog : Gtk.Window{
     private ComboBoxText sideCombo;
     private Button confirmButton;
 
-    public ChessSetupDialog() : base("Choose Your Opponent and Side")
+    public ChessSetupDialog() : base("Choose Your Opponent and Color")
     {
         SetDefaultSize(300, 200);
         Icon = new Pixbuf("Assets/icon.png");
