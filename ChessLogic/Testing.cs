@@ -2,6 +2,7 @@ using System.Diagnostics;
 
 namespace ChessLogic;
 
+// testing of time needed for a move
 public class AITesting
 {
     public static void AItest(Opponent ai)

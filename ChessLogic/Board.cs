@@ -3,6 +3,8 @@ using System.Drawing;
 
 namespace ChessLogic;
 
+// board class which stores 2d array of pieces
+// also, it offers different tools for to developer
 public class Board
 {
     public static int BoardSize { get; set; }
@@ -145,6 +147,8 @@ public class Board
         return color == Player.White ? wKingPos : bKingPos;
     }
 
+    // checks if king of specific color is in check 
+    // by checking all possible directions where attacking piece could be
     public bool IsInCheck(Player player)
     {
         Position kingPos = findKing(player);
@@ -212,6 +216,7 @@ public class Board
         return false;
     }
 
+    // creates full copy of the board
     public Board Copy()
     {
 
@@ -348,6 +353,7 @@ public class Board
         }
     }
 
+    // en passant checking function
     private bool HasPawnInPosition(Player player, Position[] pawnPositions, Position enPassantSquare)
     {
         foreach (Position pos in pawnPositions.Where(IsInside))
@@ -384,7 +390,8 @@ public class Board
 
         return HasPawnInPosition(player, pawnPositions, enPassantSquare);
     }
-    
+
+    // creates hashing for the current board state
     public ulong ComputeZobristHash(Player currentPlayer)
     {
         ulong hash = 0;

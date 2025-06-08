@@ -5,6 +5,7 @@ using System.Linq;
 
 namespace ChessLogic;
 
+// class which contains all information about game
 public class GameState
 {
 
@@ -85,12 +86,10 @@ public class GameState
                 Result = Result.Draw(EndReason.Stalemate);
             }
         }
-
         else if (Board.InsufficientMaterial())
         {
             Result = Result.Draw(EndReason.InsufficientMaterial);
         }
-
         else if (FiftyMoveRule())
         {
             Result = Result.Draw(EndReason.FiftyMoveRule);
@@ -99,8 +98,10 @@ public class GameState
         {
             Result = Result.Draw(EndReason.ThreefoldRepetition);
         }
+        else return;
     }
 
+    // creates full copy of the game
     public GameState Copy()
     {
         GameState copy = new GameState(CurrentPlayer, Board.Copy(), Opponent, CurrentPlayer)
@@ -143,6 +144,7 @@ public class GameState
         return stateHistory[stateString] >= 3;
     }
 
+    // debugging instrument, to check if gamelogic generates all possible positions starting at current position
     public int MoveGenerationTest(int depth, bool isRoot = true)
     {
         if (depth == 0)
