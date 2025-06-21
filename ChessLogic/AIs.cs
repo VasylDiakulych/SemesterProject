@@ -378,12 +378,14 @@ public class MiniMaxAI : ChessAI
 
 
     public override Opponent AIType => Opponent.MiniMaxAI;
+    GameStage stage;
+
+    // Constants constants
     const int whiteWin = 10000;
     const int blackWin = -10000;
     const int draw = 0;
-    int TotalPhase = 4000;
-    int startingDepth = 4;
-    GameStage stage;
+    const int TotalPhase = 4000;
+    const int startingDepth = 4;
 
     readonly Dictionary<PieceType, int> PiecePrice = new Dictionary<PieceType, int>{
        { PieceType.Bishop, 330 },
@@ -422,6 +424,7 @@ public class MiniMaxAI : ChessAI
         }
     }
 
+    //Simple function caclulating current stage of the game, depending on total material on the board
     private double CalculatePhase(GameState state)
     {
         int totPhase = TotalPhase;
@@ -442,6 +445,7 @@ public class MiniMaxAI : ChessAI
         else return GameStage.Middlegame;
     }
 
+    //Function for evaluating position depending on piece location
     private double PositionEval(GameState state)
     {
         int eval = 0;
@@ -452,6 +456,7 @@ public class MiniMaxAI : ChessAI
             int index = pos.Row * 8 + pos.Column;
             bool isWhite = piece.Color == Player.White;
 
+            //if piece is white acces the corresponding field from table for that piece
             if (isWhite)
             {
                 eval += piece.Type switch
@@ -468,6 +473,7 @@ public class MiniMaxAI : ChessAI
                     _ => 0
                 };
             }
+            //else mirror the index and access the table 
             else
             {
                 eval -= piece.Type switch
@@ -489,9 +495,9 @@ public class MiniMaxAI : ChessAI
         return eval;
     }
 
+    //simple mobility evaluation, where mobility = number of moves
     private double MobilityEval(GameState state, IEnumerable<Move> whiteMoves, IEnumerable<Move> blackMoves)
     {
-
         return MobilityPrice * (whiteMoves.Count() - blackMoves.Count());
     }
 
@@ -517,6 +523,7 @@ public class MiniMaxAI : ChessAI
         });
     }
 
+    //simple material evaluation function
     private double MaterialEval(GameState state)
     {
         Counting counting = state.Board.CountPieces();
@@ -555,6 +562,7 @@ public class MiniMaxAI : ChessAI
 
         stage = GetStage(state);
 
+        //total evaluation consists of 3 smaller evals
         totalEvaluation += MaterialEval(state);
         totalEvaluation += MobilityEval(state, whiteMoves, blackMoves);
         totalEvaluation += PositionEval(state);
@@ -566,6 +574,7 @@ public class MiniMaxAI : ChessAI
     {
         ulong hash = currentGame.Board.ComputeZobristHash(currentGame.CurrentPlayer);
 
+        //try to access transposition table in case position was evaluated before at higher depth
         if (transpositionTable.TryGetValue(hash, out var CachedResult) && CachedResult.depth >= depth && depth != startingDepth)
         {
             return (CachedResult.score, null);
@@ -581,6 +590,7 @@ public class MiniMaxAI : ChessAI
             return (eval, null);
         }
 
+        //Get all legal moves and order with prioritizing captures and castling
         IEnumerable<Move> legalMoves = currentGame.CurrentPlayer == Player.White ? whiteMoves : blackMoves;
         legalMoves = OrderMoves(currentGame, legalMoves);
 
@@ -620,6 +630,7 @@ public class MiniMaxAI : ChessAI
             }
         }
 
+        //add calculated score to the transposition table
         transpositionTable[hash] = (bestScore, depth);
         return (bestScore, best);
     }
