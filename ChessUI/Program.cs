@@ -498,8 +498,6 @@ class Chess
         MainMenuWindow w = new();
         w.ShowAll();
         Application.Run();
-
-        // AITesting.AItest(Opponent.MiniMaxAI);
     }
 
 }
